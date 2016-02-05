@@ -298,6 +298,10 @@ void HTKMLFReader<ElemType>::PrepareForTrainingOrTesting(const ConfigRecordType&
     }
 
     m_frameMode = readerConfig(L"frameMode", true);
+    m_segmentMode = readerConfig(L"segmentMode", false);
+    m_leftSegContextSize = readerConfig(L"leftSegContextSize", 0);
+    m_rightSegContextSize = readerConfig(L"rightSegContextSize", 0);
+
     m_verbosity = readerConfig(L"verbosity", 2);
 
     // determine if we partial minibatches are desired
@@ -918,11 +922,14 @@ bool HTKMLFReader<ElemType>::GetMinibatchToTrainOrTest(std::map<std::wstring, Ma
             // I.e. whatever is user-specified as the MB size, will be ignored here (that value is, however, passed down to the underlying reader).  BUGBUG: That is even more wrong.
             // BUGBUG: We should honor the mbSize parameter and fill up to the requested number of samples, using the requested #parallel sequences.
             // m_mbNumTimeSteps  = max (m_numFramesToProcess[.])
-            m_mbNumTimeSteps = m_numFramesToProcess[0];
-            for (size_t i = 1; i < m_numSeqsPerMB; i++)
-            {
-                if (m_mbNumTimeSteps < m_numFramesToProcess[i])
-                    m_mbNumTimeSteps = m_numFramesToProcess[i];
+            if (!m_segmentMode)
+            { 
+                m_mbNumTimeSteps = m_numFramesToProcess[0];
+                for (size_t i = 1; i < m_numSeqsPerMB; i++)
+                {
+                    if (m_mbNumTimeSteps < m_numFramesToProcess[i])
+                        m_mbNumTimeSteps = m_numFramesToProcess[i];
+                }
             }
 
             if (m_frameMode)
@@ -962,7 +969,7 @@ bool HTKMLFReader<ElemType>::GetMinibatchToTrainOrTest(std::map<std::wstring, Ma
                         }
                     }
                     m_numValidFrames[i] = m_numFramesToProcess[i];
-                    if (m_numValidFrames[i] > 0)
+                    if ((!m_segmentMode && m_numValidFrames[i] > 0) || (m_segmentMode && m_numValidFrames[i] >= m_mbNumTimeSteps))
                     {
                         if (m_frameMode)
                         {
@@ -971,6 +978,8 @@ bool HTKMLFReader<ElemType>::GetMinibatchToTrainOrTest(std::map<std::wstring, Ma
                             for (size_t s = 0; s < m_pMBLayout->GetNumParallelSequences(); s++)
                                 assert(s < m_numValidFrames[i]); // MB is already set to only include the valid frames (no need for gaps)
                         }
+                        else if (m_segmentMode)  //each segment has same length
+                            m_pMBLayout->AddSequence(NEW_SEQUENCE_ID, i, 0, m_mbNumTimeSteps);
                         else
                             m_pMBLayout->AddSequence(NEW_SEQUENCE_ID, i, 0, m_numValidFrames[i]);
 
@@ -990,7 +999,7 @@ bool HTKMLFReader<ElemType>::GetMinibatchToTrainOrTest(std::map<std::wstring, Ma
             if (!skip)
             {
                 m_extraNumSeqs = 0;
-                if (!m_frameMode)
+                if (!m_frameMode && !m_segmentMode)
                 {
                     for (size_t src = 0; src < m_numSeqsPerMB;)
                     {
@@ -1357,6 +1366,18 @@ template <class ElemType>
 void HTKMLFReader<ElemType>::fillOneUttDataforParallelmode(std::map<std::wstring, Matrix<ElemType>*>& matrices, size_t startFr,
                                                            size_t framenum, size_t channelIndex, size_t sourceChannelIndex)
 {
+    size_t numOfFramesToCopy = m_segmentMode ? m_mbNumTimeSteps : framenum;
+    size_t startFrameToCopy = 0;
+    if (m_segmentMode)  //sample the start frame randomly
+    {
+        if (framenum < m_mbNumTimeSteps)
+            RuntimeError("minibatchSize must be smaller than the minimum size of all utterances in the segmentMode.");
+
+        size_t startMax = framenum - m_mbNumTimeSteps - 1;  //index is 0-based
+        
+        //sample a segment
+        startFrameToCopy = msra::dbn::rand(0, startMax);
+    }
     size_t id;
     size_t dim;
     size_t numOfFea = m_featuresBufferMultiIO.size();
@@ -1383,7 +1404,7 @@ void HTKMLFReader<ElemType>::fillOneUttDataforParallelmode(std::map<std::wstring
 
             if (sizeof(ElemType) == sizeof(float))
             {
-                for (size_t j = 0, k = startFr; j < framenum; j++, k++) // column major, so iterate columns
+                for (size_t j = startFrameToCopy, k = startFr; j < numOfFramesToCopy + startFrameToCopy; j++, k++) // column major, so iterate columns
                 {
                     // copy over the entire column at once, need to do this because SSEMatrix may have gaps at the end of the columns
                     memcpy_s(&m_featuresBufferMultiIO[id].get()[(k * m_numSeqsPerMB + channelIndex) * dim], sizeof(ElemType) * dim, &m_featuresBufferMultiUtt[sourceChannelIndex].get()[j * dim + m_featuresStartIndexMultiUtt[id + sourceChannelIndex * numOfFea]], sizeof(ElemType) * dim);
@@ -1391,7 +1412,7 @@ void HTKMLFReader<ElemType>::fillOneUttDataforParallelmode(std::map<std::wstring
             }
             else
             {
-                for (size_t j = 0, k = startFr; j < framenum; j++, k++) // column major, so iterate columns in outside loop
+                for (size_t j = startFrameToCopy, k = startFr; j < numOfFramesToCopy + startFrameToCopy; j++, k++) // column major, so iterate columns in outside loop
                 {
                     for (int d = 0; d < dim; d++)
                     {
@@ -1411,7 +1432,7 @@ void HTKMLFReader<ElemType>::fillOneUttDataforParallelmode(std::map<std::wstring
                 m_labelsBufferAllocatedMultiIO[id] = dim * m_mbNumTimeSteps * m_numSeqsPerMB;
             }
 
-            for (size_t j = 0, k = startFr; j < framenum; j++, k++)
+            for (size_t j = startFrameToCopy, k = startFr; j < numOfFramesToCopy + startFrameToCopy; j++, k++)
             {
                 for (int d = 0; d < dim; d++)
                 {

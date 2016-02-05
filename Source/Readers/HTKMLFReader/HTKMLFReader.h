@@ -27,6 +27,10 @@ private:
     vector<bool> m_sentenceEnd;
     bool m_truncated;
     bool m_frameMode;
+    bool m_segmentMode;  //pick a segment from each utterance
+    size_t m_leftSegContextSize; 
+    size_t m_rightSegContextSize;
+
     vector<size_t> m_processedFrame; // [seq index] (truncated BPTT only) current time step (cursor)
     intargvector m_numSeqsPerMBForAllEpochs;
     size_t m_numSeqsPerMB;      // requested number of parallel sequences
