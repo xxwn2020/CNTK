@@ -55,12 +55,23 @@ public:
 
     virtual void /*ComputationNodeNonLooping::*/ ForwardPropNonLooping() override
     {
+        //hack for segment training, we need to switch layout
+        MBLayoutPtr origMBLayout = Input(0)->GetMBLayout();
+        MBLayoutPtr newMBLayout = origMBLayout->AdjustedForSegmentTraining(m_leftSegContextSize, m_rightSegContextSize);
+
+        Input(0)->LinkToMBLayout(newMBLayout);
+        Input(1)->LinkToMBLayout(newMBLayout);
+
         FrameRange fr(Input(0)->GetMBLayout());
         Input(0)->ValueFor(fr).VectorMax(*m_maxIndexes0, *m_maxValues, true);
         Input(1)->ValueFor(fr).VectorMax(*m_maxIndexes1, *m_maxValues, true, m_topK);
         MaskMissingColumnsToZero(*m_maxIndexes0, Input(0)->GetMBLayout(), fr);
         MaskMissingColumnsToZero(*m_maxIndexes1, Input(1)->GetMBLayout(), fr);
         Value().AssignNumOfDiff(*m_maxIndexes0, *m_maxIndexes1, m_topK > 1);
+
+        Input(0)->LinkToMBLayout(origMBLayout);
+        Input(1)->LinkToMBLayout(origMBLayout);
+
 #if NANCHECK
         Value().HasNan("ErrorPrediction");
 #endif

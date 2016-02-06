@@ -282,10 +282,10 @@ public:
 
     // this counts the actual number of frames in a minibatch (not counting gaps in parallel sequences)
     // TODO: Instead of passing numAllSamples in here, we should determine it from the inputs in case of no layout. Or simply forbid this case.
-    size_t GetNumSamplesWithLabel(const size_t numAllSamples) const
+    size_t GetNumSamplesWithLabel(const size_t numAllSamples, const size_t leftSegContextSize, const size_t rightSegContextSize) const
     {
         if (m_pMBLayout)
-            return m_pMBLayout->GetActualNumSamples();
+            return m_pMBLayout->AdjustedForSegmentTraining(leftSegContextSize, rightSegContextSize)->GetActualNumSamples();
         else
             return numAllSamples; // TODO: Return the actual number of samples, by inquiring our own input nodes; then eliminate the numAllSamples parameter.
     }

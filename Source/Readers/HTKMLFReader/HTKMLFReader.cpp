@@ -301,6 +301,10 @@ void HTKMLFReader<ElemType>::PrepareForTrainingOrTesting(const ConfigRecordType&
 
     m_frameMode = readerConfig(L"frameMode", true);
     m_segmentMode = readerConfig(L"segmentMode", false);
+    if (m_frameMode)
+        m_segmentMode = false;
+    if (m_segmentMode)
+        m_truncated = false;
     m_leftSegContextSize = readerConfig(L"leftSegContextSize", 0);
     m_rightSegContextSize = readerConfig(L"rightSegContextSize", 0);
 
@@ -971,7 +975,7 @@ bool HTKMLFReader<ElemType>::GetMinibatchToTrainOrTest(std::map<std::wstring, Ma
                         }
                     }
                     m_numValidFrames[i] = m_numFramesToProcess[i];
-                    if ((!m_segmentMode && m_numValidFrames[i] > 0) || (m_segmentMode && m_numValidFrames[i] >= m_mbNumTimeSteps))
+                    if (m_numValidFrames[i] > 0)
                     {
                         if (m_frameMode)
                         {
@@ -981,7 +985,17 @@ bool HTKMLFReader<ElemType>::GetMinibatchToTrainOrTest(std::map<std::wstring, Ma
                                 assert(s < m_numValidFrames[i]); // MB is already set to only include the valid frames (no need for gaps)
                         }
                         else if (m_segmentMode)  //each segment has same length
-                            m_pMBLayout->AddSequence(NEW_SEQUENCE_ID, i, 0, m_mbNumTimeSteps);
+                        {
+                            if (m_numValidFrames[i] >= m_mbNumTimeSteps)
+                            {
+                                m_pMBLayout->AddSequence(NEW_SEQUENCE_ID, i, 0, m_mbNumTimeSteps);
+                            }
+                            else  //has gap
+                            {
+                                m_pMBLayout->AddSequence(NEW_SEQUENCE_ID, i, 0, m_numValidFrames[i]);
+                                m_pMBLayout->AddGap(i, m_numValidFrames[i], m_mbNumTimeSteps);
+                            }
+                        }
                         else
                             m_pMBLayout->AddSequence(NEW_SEQUENCE_ID, i, 0, m_numValidFrames[i]);
 
@@ -1368,14 +1382,11 @@ template <class ElemType>
 void HTKMLFReader<ElemType>::fillOneUttDataforParallelmode(std::map<std::wstring, Matrix<ElemType>*>& matrices, size_t startFr,
                                                            size_t framenum, size_t channelIndex, size_t sourceChannelIndex)
 {
-    size_t numOfFramesToCopy = m_segmentMode ? m_mbNumTimeSteps : framenum;
+    size_t numOfFramesToCopy = m_segmentMode ? std::min(m_mbNumTimeSteps, framenum) : framenum;
     size_t startFrameToCopy = 0;
-    if (m_segmentMode)  //sample the start frame randomly
+    if (m_segmentMode && framenum > m_mbNumTimeSteps)  //sample the start frame randomly
     {
-        if (framenum < m_mbNumTimeSteps)
-            RuntimeError("minibatchSize must be smaller than the minimum size of all utterances in the segmentMode.");
-
-        size_t startMax = framenum - m_mbNumTimeSteps - 1;  //index is 0-based
+        size_t startMax = framenum - m_mbNumTimeSteps;
         
         //sample a segment
         startFrameToCopy = msra::dbn::rand(0, startMax);

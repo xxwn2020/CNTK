@@ -264,7 +264,7 @@ public:
     // -----------------------------------------------------------------------
 
     ComputationNodeBase(DEVICEID_TYPE deviceId, const wstring& name)
-        : m_deviceId(deviceId), m_outputNeededDuringBackprop(true), m_parameterUpdateRequired(false), m_gradientInitialized(false), m_nodeName(name == L"" ? CreateUniqNodeName() : name)
+        : m_deviceId(deviceId), m_outputNeededDuringBackprop(true), m_parameterUpdateRequired(false), m_gradientInitialized(false), m_nodeName(name == L"" ? CreateUniqNodeName() : name), m_leftSegContextSize(0), m_rightSegContextSize(0)
     {
     }
     virtual ~ComputationNodeBase()
@@ -452,6 +452,12 @@ public:
     virtual void VerifyDims(ComputationNodeBasePtr node)
     {
         VerifyDims(node->GetSampleLayout(), node->HasMBLayout());
+    }
+
+    void SetContextSizesForSegmentTraining(const size_t leftSegContextSize, const size_t rightSegContextSize)
+    {
+        m_leftSegContextSize = leftSegContextSize;
+        m_rightSegContextSize = rightSegContextSize;
     }
 
     // MBLayout (minibatch structure)
@@ -814,6 +820,9 @@ protected:
     // administrative
     DEVICEID_TYPE m_deviceId; // CPU=-1, >=0 GPU
     std::wstring m_nodeName;
+
+    size_t m_leftSegContextSize;
+    size_t m_rightSegContextSize;
 
     // inputs
     std::vector<ComputationNodeBasePtr> m_inputs;
@@ -1752,7 +1761,8 @@ protected:                                                                      
     using Base::RequestMatricesBeforeForwardProp;                                                                                                        \
     using Base::RequestMatrixFromPool;                                                                                                                   \
     using Base::Save;                                                                                                                                    \
-    using Base::SetDims1;                                                                                                                                \
+    using Base::SetContextSizesForSegmentTraining;                    \
+    using Base::SetDims1;                                                                                                                                    \
     using Base::SetDims;                                                                                                                                 \
     using Base::SetInput;                                                                                                                                \
     using Base::SetParameterUpdateRequired;                                                                                                              \
@@ -1780,7 +1790,8 @@ protected:                                                                      
     using Base::m_value;                                                                                                                                 \
     using Base::m_valueSharable;                                                                                                                         \
     using Base::shared_from_this;                                                                                                                        \
-    \
+    using Base::m_leftSegContextSize;                                     \
+    using Base::m_rightSegContextSize;                                     \
 public:                                                                                                                                                  \
     using Base::AttachInputs;                                                                                                                            \
     using Base::CreateGradientMatrixIfNull;                                                                                                              \

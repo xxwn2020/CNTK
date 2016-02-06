@@ -72,7 +72,8 @@ typedef size_t UniqueSequenceId;
 //  - ComputationNode::GetNumCols() == MBLayout::GetNumTimeSteps() * MBLayout::GetNumParallelSequences()
 //  - ComputationNetwork ensures that m_{value,gradient} are allocated correctly before calling ForwardProp() on a node
 
-struct MBLayout
+struct MBLayout : std::enable_shared_from_this<MBLayout>
+
 {
     typedef std::shared_ptr<MBLayout> MBLayoutPtr;
 
@@ -405,7 +406,36 @@ private:
     mutable bool m_writable;
 
 public:
-
+    //hack for segment training
+    MBLayoutPtr AdjustedForSegmentTraining(const size_t leftSegContextSize, const size_t rightSegContextSize)
+    {
+        if (leftSegContextSize == 0 && rightSegContextSize == 0)
+        {
+            return shared_from_this();
+        }
+        else  //make a copy
+        {
+            MBLayoutPtr newMBLayout = make_shared<MBLayout>();
+            newMBLayout->Init(GetNumParallelSequences(), GetNumTimeSteps());
+            const vector<SequenceInfo> &allSeqs = GetAllSequences();
+            for (const auto& seq : allSeqs)
+            {
+                size_t startOfValidFrame = seq.tBegin+leftSegContextSize;
+                size_t endOfValidFrame = seq.tEnd - rightSegContextSize;
+                if (endOfValidFrame <= startOfValidFrame)
+                {
+                    newMBLayout->AddGap(seq.s, seq.tBegin, seq.tEnd);
+                }
+                else
+                {
+                    newMBLayout->AddGap(seq.s, seq.tBegin, startOfValidFrame);
+                    newMBLayout->AddSequence(seq.seqId, seq.s, startOfValidFrame, endOfValidFrame);
+                    newMBLayout->AddGap(seq.s, endOfValidFrame, seq.tEnd);
+                }
+            }
+            return newMBLayout;
+        }
+    }
     // special accessor for sequence training  --TODO: must be replaced by a different mechanism
     bool IsEnd(size_t s, size_t t) const
     {

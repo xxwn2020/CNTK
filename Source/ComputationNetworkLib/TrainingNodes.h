@@ -184,6 +184,12 @@ public:
 
     virtual void /*ComputationNodeNonLooping::*/ ForwardPropNonLooping() override // -sum(left_i * log(softmax_i(right)))
     {
+        MBLayoutPtr origMBLayout = Input(0)->GetMBLayout();
+        MBLayoutPtr newMBLayout = origMBLayout->AdjustedForSegmentTraining(m_leftSegContextSize, m_rightSegContextSize);
+
+        Input(0)->LinkToMBLayout(newMBLayout);
+        Input(1)->LinkToMBLayout(newMBLayout);
+
         FrameRange fr(Input(0)->GetMBLayout());
         // first compute the softmax (column-wise)
         // Note that we need both log and non-log for gradient computation.
@@ -195,6 +201,10 @@ public:
         // reduce over all frames
         Value().AssignInnerProductOfMatrices(Input(0)->MaskedValueFor(fr), *m_logSoftmaxOfRight);
         Value() *= -1;
+
+        Input(0)->LinkToMBLayout(origMBLayout);
+        Input(1)->LinkToMBLayout(origMBLayout);
+
 #if NANCHECK
         Value().HasNan("CrossEntropyWithSoftmax");
 #endif

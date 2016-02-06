@@ -200,6 +200,11 @@ protected:
     floatargvector m_dropoutRates;
     size_t m_maxTempMemSizeInSamplesForCNN;
 
+    //segment mode
+    size_t m_leftSegContextSize;
+    size_t m_rightSegContextSize;
+    bool m_segmentMode;
+
     int m_traceLevel;
 
     size_t m_numPrevLearnRates;

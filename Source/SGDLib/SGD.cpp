@@ -313,6 +313,15 @@ void SGD<ElemType>::TrainOrAdaptModel(int startEpoch, ComputationNetworkPtr net,
         ComputationNetwork::SetMaxTempMemSizeForCNN(refNet, refNode, m_maxTempMemSizeInSamplesForCNN);
     }
 
+    //segment mode training
+    if (m_segmentMode)
+    {
+        fprintf(stderr, "Set leftSegContextSize to %lu and rightSegContextSize to %lu\n", m_leftSegContextSize, m_rightSegContextSize);
+
+        criterionNodes[0]->SetContextSizesForSegmentTraining(m_leftSegContextSize, m_rightSegContextSize);
+        evaluationNodes[0]->SetContextSizesForSegmentTraining(m_leftSegContextSize, m_rightSegContextSize);
+    }
+
     // likewise for sequence training parameters
     if (isSequenceTrainingCriterion)
     {
@@ -488,7 +497,7 @@ void SGD<ElemType>::TrainOrAdaptModel(int startEpoch, ComputationNetworkPtr net,
         {
             if (validationSetDataReader != trainSetDataReader && validationSetDataReader != nullptr)
             {
-                SimpleEvaluator<ElemType> evalforvalidation(net);
+                SimpleEvaluator<ElemType> evalforvalidation(net, 100, m_leftSegContextSize, m_rightSegContextSize);
                 vector<wstring> cvSetTrainAndEvalNodes;
                 if (criterionNodes.size() > 0)
                 {
@@ -928,7 +937,7 @@ size_t SGD<ElemType>::TrainOneEpoch(ComputationNetworkPtr net,
         } // if (actualMBSize > 0)
 
         // for progress and statistics, we should only count frames that are not gaps
-        size_t numSamplesWithLabel = wasDataRead ? net->GetNumSamplesWithLabel(actualMBSize) : 0;
+        size_t numSamplesWithLabel = wasDataRead ? net->GetNumSamplesWithLabel(actualMBSize, m_leftSegContextSize, m_rightSegContextSize) : 0;
 
         // Sum of actualMBSize across all nodes when using parallel training
         size_t aggregateNumSamples = actualMBSize;
@@ -2460,6 +2469,11 @@ SGDParams::SGDParams(const ConfigRecordType& configSGD, size_t sizeofElemType)
     bool useNesterovMomentum = configSGD(L"useNAG", false);
 
     m_maxTempMemSizeInSamplesForCNN = configSGD(L"maxTempMemSizeInSamplesForCNN", (size_t) 0);
+
+    m_leftSegContextSize = configSGD(L"leftSegContextSize", (size_t)0);
+    m_rightSegContextSize = configSGD(L"rightSegContextSize", (size_t)0);
+    m_segmentMode = configSGD(L"segmentMode", false);
+
 
     m_traceLevel = configSGD(L"traceLevel", (int) 0);
     m_numMBsToShowResult = configSGD(L"numMBsToShowResult", (size_t) 10);

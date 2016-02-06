@@ -24,8 +24,8 @@ template <class ElemType>
 class SimpleEvaluator
 {
 public:
-    SimpleEvaluator(ComputationNetworkPtr net, const size_t numMBsToShowResult = 100, const int traceLevel = 0)
-        : m_net(net), m_numMBsToShowResult(numMBsToShowResult), m_traceLevel(traceLevel)
+    SimpleEvaluator(ComputationNetworkPtr net, const size_t numMBsToShowResult = 100, const int traceLevel = 0, const size_t leftSegContextSize = 0, const size_t rightSegcontextSize = 0)
+        : m_net(net), m_numMBsToShowResult(numMBsToShowResult), m_traceLevel(traceLevel), m_leftSegContextSize(leftSegContextSize), m_rightSegContextSize(rightSegcontextSize)
     {
     }
 
@@ -103,7 +103,7 @@ public:
             // for now since we share the same label masking flag we call this on one node only
             // Later, when we apply different labels on different nodes
             // we need to add code to call this function multiple times, one for each criteria node
-            size_t numSamplesWithLabel = m_net->GetNumSamplesWithLabel(actualMBSize);
+            size_t numSamplesWithLabel = m_net->GetNumSamplesWithLabel(actualMBSize, m_leftSegContextSize, m_rightSegContextSize);
             for (int i = 0; i < evalNodes.size(); i++)
             {
                 m_net->ForwardProp(evalNodes[i]);
@@ -198,6 +198,8 @@ protected:
 protected:
     ComputationNetworkPtr m_net;
     size_t m_numMBsToShowResult;
+    size_t m_leftSegContextSize;
+    size_t m_rightSegContextSize;
     int m_traceLevel;
     void operator=(const SimpleEvaluator&); // (not assignable)
 };
