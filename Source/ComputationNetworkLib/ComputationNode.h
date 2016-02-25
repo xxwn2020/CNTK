@@ -160,7 +160,7 @@ struct ComputationNetworkOwnedNodeState
 
     virtual void MarkValueNonSharable() { m_valueSharable = false; }
     virtual void MarkValueSharable() { m_valueSharable = true; }
-    bool isValueSharable() const { return m_valueSharable; }
+    bool IsValueSharable() const { return m_valueSharable; }
 
 protected:                // TODO: should be fully encapsulated here
 
@@ -1366,15 +1366,17 @@ public:
     // request matrices needed to do node function value evaluation
     virtual void RequestMatricesBeforeForwardProp(MatrixPool& matrixPool) override
     {
-        // TODO: Non-shareable nodes should not get their matrices from the pool ever.
-        RequestMatrixFromPool(m_value, matrixPool);
+        if (IsValueSharable())
+            RequestMatrixFromPool(m_value, matrixPool);
+        else
+            CreateMatrixIfNull(m_value);
     }
 
     // release temp matrices that are only used by forward computation
     // don't release matrices that need to be used in the gradient computation
     virtual void ReleaseMatricesAfterForwardProp(MatrixPool& matrixPool) override
     {
-        if (!IsOutputNeededDuringBackprop() && (m_value->GetMatrixType() != SPARSE) && isValueSharable())
+        if (!IsOutputNeededDuringBackprop() && (m_value->GetMatrixType() != SPARSE) && IsValueSharable())
             ReleaseMatrixToPool(m_value, matrixPool);
     }
 
@@ -1403,7 +1405,7 @@ public:
 
             // Release the Value matrix only if the output value is needed during backprop
             // since in the case it isn't used, we release it during forward prop itself
-            if (IsOutputNeededDuringBackprop() && m_value->GetMatrixType() != SPARSE && isValueSharable())
+            if (IsOutputNeededDuringBackprop() && m_value->GetMatrixType() != SPARSE && IsValueSharable())
                 ReleaseMatrixToPool(m_value, matrixPool);
         }
     }
