@@ -69,7 +69,7 @@ L"AveragePooling(input, windowWidth, windowHeight, horizontalSubsample, vertical
 L"ColumnwiseCrossProduct = KhatriRaoProduct // deprecated \n" // TODO: should it be deprecated? It is described as easier to understand in the CNTKBook.
 L"ClassificationError = ErrorPrediction \n"
 L"Delay = PastValue \n" // TODO: should it allow negative offsets and an if test here?
-L"BatchNormalization(input, scale, bias, runMean, runInvStdDev, eval, spatial, expAvgFactor = 1.0, epsilon = 0.00001, useCntkEngine = true, imageLayout='CHW', tag='') = new ComputationNode [ operation = 'BatchNormalization' ; inputs = (input : scale : bias : runMean : runInvStdDev) /*plus the function args*/ ]\n"
+    L"BatchNormalization(input, scale, bias, runMean, runInvStdDev, eval, spatial, normalizationTimeConstant = 0, epsilon = 0.00001, useCntkEngine = true, imageLayout='CHW', tag='') = new ComputationNode [ operation = 'BatchNormalization' ; inputs = (input : scale : bias : runMean : runInvStdDev) /*plus the function args*/ ]\n"
 // standard nodes. We use macros to define these strings.
 #define UnaryStandardNode(Op, a) L## #Op L"(" L## #a L", tag='') = new ComputationNode [ operation = '" L## #Op L"' ; inputs = " L## #a L" /*plus the function args*/ ]\n"
 #define BinaryStandardNode(Op, a, b) L## #Op L"(" L## #a L", " L## #b L", tag='') = new ComputationNode [ operation = '" L## #Op L"' ; inputs = (" L## #a L" : " L## #b L") /*plus the function args*/ ]\n"
