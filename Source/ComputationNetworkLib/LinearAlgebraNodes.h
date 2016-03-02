@@ -206,54 +206,45 @@ public:
             m_outputRank = 1;
     }
 
+    virtual void /*ComputationNode::*/ ForwardProp(const FrameRange& fr) override
+    {
+        // TensorView::DoMatrixProductOf() will reduce each tensor object into a 2D tensor (or fail if it cannot)
+        // and recreate actual Matrix objects (in case of sparse, they must be identical to the original tensor storage object).
+        // Transposition is applied after flattening into 2D.
+        auto output =           ValueTensorFor(          GetSampleLayout().GetRank(), fr);
+        auto input0 = Input(0)->ValueTensorFor(Input(0)->GetSampleLayout().GetRank(), FrameRange(/*select entire object*/));
+        auto input1 = Input(1)->ValueTensorFor(Input(1)->GetSampleLayout().GetRank(), fr);
+        output.AssignMatrixProductOf(false/*transC*/, input0, m_transpose/*transA*/, input1, false/*transB*/);
+    }
+
     virtual void /*ComputationNode::*/ BackpropTo(const size_t inputIndex, const FrameRange& fr) override
     {
         if (inputIndex == 0) // left derivative
         {
-            // this potentially computes inner products over time, so we use the Masked- variants
-            auto sliceOutputGrad = MaskedGradientFor(fr);
-            auto sliceInput1Value = Input(1)->MaskedValueFor(fr);
-            auto& input0Grad = Input(0)->GradientAsMatrix();
-
-            // currently we only support one combination when the input is sparse.
-            if (sliceInput1Value.GetMatrixType() == SPARSE && Input(0)->Gradient().GetMatrixType() == DENSE && sliceOutputGrad.GetMatrixType() == DENSE)
+            // currently we only support one combination when the input is sparse
+            // If input data is sparse, then gradient is block sparse.
+            if (Input(1)->Value().GetMatrixType() == SPARSE && Input(0)->Gradient().GetMatrixType() == DENSE && Gradient().GetMatrixType() == DENSE)
                 Input(0)->Gradient().SwitchToMatrixType(SPARSE, MatrixFormat::matrixFormatSparseBlockCol, false);
 
-            bool transpose = m_transpose; // (assigning to a non-const variable avoids a compiler warning C4127: conditional expression is constant)
-            if (!transpose)
-                Matrix<ElemType>::MultiplyAndAdd(sliceOutputGrad, false, sliceInput1Value, true, input0Grad);
-            else
-                Matrix<ElemType>::MultiplyAndAdd(sliceInput1Value, false, sliceOutputGrad, true, input0Grad);
+            // this potentially computes inner products over time, so we must mask gaps to 0
+            MaskMissingGradientColumnsToZero(fr);
+            Input(1)->MaskMissingValueColumnsToZero(fr);
+            auto outputGradient =           GradientTensorFor(          GetSampleLayout().GetRank(), fr);
+            auto input0Gradient = Input(0)->GradientTensorFor(Input(0)->GetSampleLayout().GetRank(), FrameRange(/*select entire object*/));
+            auto input1         = Input(1)->   ValueTensorFor(Input(1)->GetSampleLayout().GetRank(), fr);
+            input0Gradient.AddMatrixProductOf(m_transpose/*transC*/, outputGradient, false/*transA*/, input1, true/*transB*/);
         }
-        else // right derivative
+        else if (inputIndex == 1) // right derivative
         {
-            auto sliceInput1Grad = Input(1)->GradientFor(fr);
-            auto sliceOutputGrad = GradientFor(fr);
-
-            Matrix<ElemType>::MultiplyAndAdd(Input(0)->ValueAsMatrix(), !m_transpose, sliceOutputGrad, false, sliceInput1Grad);
+            auto outputGradient =           GradientTensorFor(          GetSampleLayout().GetRank(), fr);
+            auto input0         = Input(0)->   ValueTensorFor(Input(0)->GetSampleLayout().GetRank(), FrameRange(/*select entire object*/));
+            auto input1Gradient = Input(1)->GradientTensorFor(Input(1)->GetSampleLayout().GetRank(), fr);
+            input1Gradient.AddMatrixProductOf(false/*transC*/, input0, !m_transpose/*transA*/, outputGradient, false/*transB*/);
         }
     }
 
     virtual bool OutputUsedInComputingInputNodesGradients() const override { return false; }
     // but both inputs are
-
-    virtual void /*ComputationNode::*/ ForwardProp(const FrameRange& fr) override
-    {
-        // right operand and output can have MB layout, while left operand cannot
-        auto sliceInput1Value = Input(1)->ValueFor(fr);
-        auto sliceOutputValue = ValueFor(fr);
-#if DUMPOUTPUT
-        Input(0)->ValueAsMatrix().Print("TimesNode - Input0");
-#endif
-        // BUGBUG: This uses correct Matrix dimensions when multiplying with a non-minibatch only by luck. To be fixed when we allow to apply TimesNode to a subset of tensor dimensions.
-        sliceOutputValue.AssignProductOf(Input(0)->ValueAsMatrix(), m_transpose, sliceInput1Value, false);
-#if NANCHECK
-        sliceOutputValue.HasNan("Times");
-#endif
-#if DUMPOUTPUT
-        sliceOutputValue.Print("TimesNode");
-#endif
-    }
 
     virtual void /*ComputationNodeBase::*/ Validate(bool isFinalValidationPass) override
     {
@@ -264,7 +255,6 @@ public:
 
         bool transpose = m_transpose; // (assigning to a non-const variable avoids a compiler warning C4127: conditional expression is constant)
 
-#if 0
         // get tensor shapes
         auto dimsA = Input(0)->GetSampleLayout().GetDims();
         auto dimsB = Input(1)->GetSampleLayout().GetDims();
@@ -277,21 +267,21 @@ public:
             // if transposing then only support actual matrices or column vectors
             if (transpose)
             {
-                if (dimsA.size() == 1)  // column vector: treat as N x 1 matrix
+                if (dimsA.size() == 1) // column vector transposed becomes a 2D tensor
                     dimsA.push_back(1);
                 else if (dimsA.size() != 2)
-                    InvalidArgument("%ls %ls operation: The first outputRank (%d) dimensions in left argument's shape [%s] must not be 0.", NodeName().c_str(), OperationName().c_str(), (int)m_outputRank, dimsAstring.c_str());
-                if (m_outputRank != 1)
-                    InvalidArgument("%ls %ls operation: outputRank (%d) must be 1.", NodeName().c_str(), OperationName().c_str(), (int)m_outputRank, dimsAstring.c_str());
+                    InvalidArgument("%ls %ls operation: Transposition requires a 2D tensor (matrix) or a 1D tensor (column vector), instead of a [%s].", NodeName().c_str(), OperationName().c_str(), dimsAstring.c_str());
+                else if (m_outputRank != 1)
+                    InvalidArgument("%ls %ls operation: The outputRank (%d) must be 1 when transposing.", NodeName().c_str(), OperationName().c_str(), (int)m_outputRank);
                 // swap them temporarily, to get transposition out of the way for validation
                 std::swap(dimsA[0], dimsA[1]);
             }
 
-            if (m_outputRank > dimsA.size())
+            if (m_outputRank > dimsA.size()) // note: it may be equal in case of dyadic product uv'
                 InvalidArgument("%ls %ls operation: outputRank %d exceeds left argument's shape [%s].", NodeName().c_str(), OperationName().c_str(), (int)m_outputRank, dimsAstring.c_str());
-            auto numReductionDims = dimsA.size() - m_outputRank;  // we reduce over the remaining dims; this is their number
+            auto numReductionDims = dimsA.size() - m_outputRank;  // we reduce over the remaining dims; this is their number. Can be 0 in case of dyadic product uv'
             if (numReductionDims > dimsB.size())
-                InvalidArgument("%ls %ls operation: right argument shape [%s] has too few dimensions for outputRank %d.", NodeName().c_str(), OperationName().c_str(), (int)m_outputRank, dimsBstring.c_str(), (int)m_outputRank);
+                InvalidArgument("%ls %ls operation: right argument shape [%s] has too few dimensions for outputRank %d.", NodeName().c_str(), OperationName().c_str(), dimsBstring.c_str(), (int)m_outputRank);
 
             // validate or automatically infer dimension inference for learnable parameters
             for (size_t k = 0; k < m_outputRank; k++) // outputRank dimensions cannot be inferred
@@ -299,6 +289,7 @@ public:
                     InvalidArgument("%ls %ls operation: The outputRank (%d) dimensions in left argument's shape [%s] must not be 0.", NodeName().c_str(), OperationName().c_str(), (int)m_outputRank, dimsAstring.c_str());
 
             // fill in the missing ones
+            // We fill in dimensions given as 0. The tensor rank is not inferred.
             for (size_t k = m_outputRank; k < dimsA.size(); k++)
             {
                 auto& dimA = dimsA[k];
@@ -307,60 +298,26 @@ public:
                     InvalidArgument("%ls %ls operation: Right [%s] operand must have zero dimensions.", NodeName().c_str(), OperationName().c_str(), dimsBstring.c_str());
                 else if (dimA == 0)
                     dimA = dimB; // infer dimension
+                else if (dimA != dimB)
+                    InvalidArgument("%ls %ls operation: Left [%s] and right [%s] operands' shapes are not compatible.", NodeName().c_str(), OperationName().c_str(), dimsAstring.c_str(), dimsBstring.c_str());
             }
 
-            // swap back in case of TransposeTimes
+            // now determine result dimensions
+            auto dimsC = dimsA;
+            dimsC.resize(m_outputRank);    // output dims
+            for (size_t k = numReductionDims; k < dimsB.size(); k++)
+                dimsC.push_back(dimsB[k]); // input dims
+            SetDims(TensorShape(dimsC), Input(1)->HasMBLayout());
+
+            // update dimensions of A
             if (transpose)
                 std::swap(dimsA[0], dimsA[1]);
-
             // update if LearnableParameter
             Input(0)->ValidateInferInputDimsFrom(TensorShape(dimsA));
-
             // and verify once again
             if (isFinalValidationPass && Input(0)->GetSampleLayout().GetDims() != dimsA)
                 InvalidArgument("%ls %ls operation: Left [%s] and right [%s] operands' shapes are not compatible.", NodeName().c_str(), OperationName().c_str(), dimsAstring.c_str(), dimsBstring.c_str());
-
-            // now determine output dimensions
-            auto dimsC = dimsA;
-            for (size_t k = numReductionDims; k < dimsB.size(); k++)
-                dimsC.push_back(dimsB[k]);
-            SetDims(TensorShape(dimsC), Input(1)->HasMBLayout());
         }
-#endif
-
-#if 1
-        // support automatic dimension inference for learnable parameters
-        size_t rows0 = Input(0)->GetAsMatrixNumRows(), cols0 = Input(0)->GetAsMatrixNumCols();
-        if (transpose)
-            std::swap(rows0, cols0);
-        size_t rows1 = Input(1)->HasMBLayout() ? Input(1)->GetSampleMatrixNumRows() : Input(1)->GetAsMatrixNumRows();
-
-        // limited automatic dimension inference for *children*, useful for CNN since it can be hard to know the size of each input parameter without deep knowledge how CNN is implemented (padding, stride)
-        // infer cols0 as rows1
-        Input(0)->ValidateInferInputDimsFrom(m_transpose ? TensorShape(rows1, rows0) : TensorShape(rows0, rows1));
-
-        // TODO: With tensors, inner dimensions must match.
-        // after multiplication the tensor structure is lost
-        if (Input(1)->HasMBLayout())
-        {
-            // infer rows1 as cols0
-            Input(1)->ValidateInferInputDimsFrom(TensorShape(cols0));
-            SetDims(TensorShape(rows0), true);
-        }
-        else // multiplying two straight matrices
-        {
-            size_t cols1 = Input(1)->GetAsMatrixNumCols();
-            // infer rows1 as cols0
-            Input(1)->ValidateInferInputDimsFrom(TensorShape(cols0, cols1));
-            SetDims(TensorShape(rows0, cols1), false);
-        }
-
-        // update after inference
-        cols0 = m_transpose ? Input(0)->GetAsMatrixNumRows() : Input(0)->GetAsMatrixNumCols();
-        rows1 = Input(1)->HasMBLayout() ? Input(1)->GetSampleMatrixNumRows() : Input(1)->GetAsMatrixNumRows();
-        if (isFinalValidationPass && cols0 != rows1)
-            InvalidArgument("The inner matrix dimension in the %ls Times operation does not match (%d vs. %d).", NodeName().c_str(), (int) rows1, (int) cols0);
-#endif
     }
 
     virtual void AllocateGradientMatricesForInputs(MatrixPool& matrixPool) override
@@ -1221,7 +1178,7 @@ public:
         leftTermTemp.AssignElementProductOfWithShiftNeg(invNorm0, invNorm1, shift, negNumber);
 
         // compute the right values
-        // Again, the ouput is a matrix of (negNumber+1, invNorm0.cols)
+        // Again, the output is a matrix of (negNumber+1, invNorm0.cols)
         rightTermTemp.AssignInnerProductOfWithShiftNeg(in0, in1, true, shift, negNumber);
 
         // compute the evaluation result matrix by multiply these two matrices, element by element

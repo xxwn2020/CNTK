@@ -404,9 +404,9 @@ private:
     void CheckTensorIsMatrix() const
     {
         if (HasMBLayout())
-            LogicError("CheckTensorIsMatrix: Minibatch data cannot be interpreted as a single 2D tensor.");
+            LogicError("%ls %ls operation: Minibatch data cannot be interpreted as a single 2D tensor.", NodeName().c_str(), OperationName().c_str());
         else if (m_sampleLayout.GetRank() < 1 || m_sampleLayout.GetRank() > 2) // note: scalars are not stored as tensors of rank 0, but rather as 1-dim vectors. TODO: clean this up some day
-            LogicError("CheckTensorIsMatrix: Sample is not a column vector or matrix (1D or 2D tensor).");
+            LogicError("%ls %ls operation: Sample [%s] is not a column vector or matrix (1D or 2D tensor).", NodeName().c_str(), OperationName().c_str(), string(m_sampleLayout).c_str());
     }
 public:
     size_t GetAsMatrixNumRows() const
@@ -574,6 +574,7 @@ public:
 
     // helper to access to element(0,0) without having to type-cast
     virtual double Get00Element() const = 0;
+    virtual MatrixBasePtr ValuePtr() const = 0; // for use in readers that pass the agnostic object around
 
     // TODO: two sets of functions, choose one
     const std::wstring& NodeName() const { return m_nodeName; }
@@ -630,7 +631,7 @@ protected:
     void ValidateBinaryZip(bool isFinalValidationPass, bool allowBroadcast);
     void ValidateBinaryReduce(bool isFinalValidationPass);
     void InferMBLayoutFromInputsForStandardCase();
-    virtual void ValidateInferInputDimsFrom(const TensorShape&) = 0;    // (implemented by ComputationNode<ElemType>
+    virtual void ValidateInferInputDimsFrom(const TensorShape&) = 0;    // (implemented by ComputationNode<ElemType>)
 
 public:
 
@@ -1094,6 +1095,9 @@ public:
     const Matrix<ElemType>& Value() const { return *m_value; }
     Matrix<ElemType>&       Value()       { return *m_value; }
 
+    MatrixBasePtr ValuePtr() const override final { return m_value; }    // readers want this as a shared_ptr straight
+    // Note: We cannot return a const& since returning m_value as a MatrixBasePtr is a type cast that generates a temporary. Interesting.
+
     const Matrix<ElemType>& Gradient() const { return *m_gradient; }
     Matrix<ElemType>&       Gradient()       { return *m_gradient; }
 
@@ -1132,7 +1136,7 @@ private:
         // We only get here if the tensor indeed describes an 1D or 2D object. In that case, just verify the dimensions.
         try
         {
-            data.VerifySize(numRows, numCols);
+        data.VerifySize(numRows, numCols);
         }
         catch (const std::exception& e)
         {
@@ -1249,8 +1253,8 @@ protected:
         DetermineDataSize(rows, cols);
         try
         {
-            m.VerifySize(rows, cols);
-        }
+        m.VerifySize(rows, cols);
+    }
         catch (const std::exception& e)
         {
             Rethrow(e);
@@ -1405,7 +1409,7 @@ public:
     virtual void RequestMatricesBeforeForwardProp(MatrixPool& matrixPool) override
     {
         if (IsValueSharable())
-            RequestMatrixFromPool(m_value, matrixPool);
+        RequestMatrixFromPool(m_value, matrixPool);
         else
             CreateMatrixIfNull(m_value);
     }
@@ -1675,6 +1679,7 @@ public:
     virtual void CopyTo(ComputationNodeBasePtr node, const std::wstring& newName, const CopyNodeFlags flags) const override { NOT_IMPLEMENTED; }
     virtual ComputationNodeBasePtr Duplicate(const std::wstring& newName, const CopyNodeFlags flags) override { NOT_IMPLEMENTED; }
     virtual double Get00Element() const override { NOT_IMPLEMENTED; }
+    virtual MatrixBasePtr ValuePtr() const override { NOT_IMPLEMENTED; }
     virtual void UpdateFunctionMBSize() override { NOT_IMPLEMENTED; }
     virtual void AttachInputs(const std::vector<ComputationNodeBasePtr>& inputs) override { NOT_IMPLEMENTED; }
     virtual void PrintSelf(bool) const override { NOT_IMPLEMENTED; }
