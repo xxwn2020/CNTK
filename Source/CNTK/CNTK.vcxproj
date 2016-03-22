@@ -120,7 +120,7 @@
       <PreprocessorDefinitions>%(PreprocessorDefinitions);CPUONLY</PreprocessorDefinitions>
     </ClCompile>
     <Link>
-      <DelayLoadDLLs>Math.dll; msmpi.dll;</DelayLoadDLLs>
+      <DelayLoadDLLs>Math.dll; msmpi.dll;api-ms-win-core-path-l1-1-0.dll</DelayLoadDLLs>
     </Link>
     <PostBuildEvent>
       <Message Condition="'$(Configuration)|$(Platform)'=='Release_CpuOnly|x64'">Copying dependencies</Message>
