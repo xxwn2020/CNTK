@@ -17,8 +17,11 @@
 #ifdef _WIN32
 #define NOMINMAX
 #include "Windows.h"
+#include <VersionHelpers.h>
 #include <Pathcch.h>
 #pragma comment(lib, "Pathcch.lib")
+#include <Shlwapi.h>
+#pragma comment(lib, "Shlwapi.lib")
 #endif
 #ifdef __unix__
 #include <unistd.h>
@@ -148,11 +151,28 @@ void File::Init(const wchar_t* filename, int fileOptions)
 /*static*/ wstring File::DirectoryPathOf(wstring path)
 {
 #if WIN32
-    auto hr = PathCchRemoveFileSpec(&path[0], path.size());
-    if (hr == S_OK) // done
-        path.resize(wcslen(&path[0]));
-    else if (hr == S_FALSE) // nothing to remove: use .
-        path = L".";
+    if (IsWindows8OrGreater())
+    {
+        auto hr = PathCchRemoveFileSpec(&path[0], path.size());
+        if (hr == S_OK) // done
+            path.resize(wcslen(&path[0]));
+        else if (hr == S_FALSE) // nothing to remove: use .
+            path = L".";
+    }
+    else
+    {
+        BOOL hr = PathRemoveFileSpec(&path[0]);
+        if (hr) // done
+            path.resize(wcslen(&path[0]));
+        else
+            path = L".";
+    }
+
+//    auto hr = PathCchRemoveFileSpec(&path[0], path.size());
+//    if (hr == S_OK) // done
+//        path.resize(wcslen(&path[0]));
+//    else if (hr == S_FALSE) // nothing to remove: use .
+//        path = L".";
 #else
     auto pos = path.find_last_of(L"/");
     if (pos != path.npos)
