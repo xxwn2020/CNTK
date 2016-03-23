@@ -17,9 +17,15 @@
 #ifdef _WIN32
 #define NOMINMAX
 #include "Windows.h"
+
+// need this for check of WindowsVersion in DirectoryPathOf
 #include <VersionHelpers.h>
+
+// this references api-ms-win-core-path-l1-1-0.dll, this DLL is delay-loaded into CNTK.exe
 #include <Pathcch.h>
 #pragma comment(lib, "Pathcch.lib")
+
+// this include and this library reference can be removed as soon as we get rif of the Win7 support in function DirectoryPathOf
 #include <Shlwapi.h>
 #pragma comment(lib, "Shlwapi.lib")
 #endif
@@ -153,6 +159,7 @@ void File::Init(const wchar_t* filename, int fileOptions)
 #if WIN32
     if (IsWindows8OrGreater())
     {
+        //PathCchRemoveFileSpec isn't supported on Win7
         auto hr = PathCchRemoveFileSpec(&path[0], path.size());
         if (hr == S_OK) // done
             path.resize(wcslen(&path[0]));
