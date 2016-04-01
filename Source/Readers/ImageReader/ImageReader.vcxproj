@@ -55,15 +55,10 @@
   </ImportGroup>
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup>
+    <LinkIncremental>$(DebugBuild)</LinkIncremental>
     <IncludePath>..\..\common\include;..\..\math;$(OPENCV_PATH)\include;$(ZipInclude);$(IncludePath);</IncludePath>
     <LibraryPath>$(SolutionDir)$(Platform)\$(Configuration);$(OPENCV_PATH)\x64\vc12\lib;$(ZipLibPath);$(LibraryPath);</LibraryPath>
     <OpenCVLib Condition="$(HasOpenCV)">opencv_world300.lib</OpenCVLib>
-  </PropertyGroup>
-  <PropertyGroup Condition="$(DebugBuild)">
-    <LinkIncremental>true</LinkIncremental>
-  </PropertyGroup>
-  <PropertyGroup Condition="$(ReleaseBuild)">
-    <LinkIncremental>false</LinkIncremental>
   </PropertyGroup>
   <ItemDefinitionGroup>
     <ClCompile>
@@ -73,11 +68,13 @@
       <SDLCheck>true</SDLCheck>
       <TreatWarningAsError>true</TreatWarningAsError>
       <OpenMPSupport>true</OpenMPSupport>
+      <AdditionalIncludeDirectories>../ReaderLib</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <AdditionalDependencies>ReaderLib.lib;Math.lib;$(OpenCVLib);$(ZipLibs);%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalLibraryDirectories>../ReaderLib</AdditionalIncludeDirectories>
     </Link>
     <PostBuildEvent>
       <Command>if "$(HasOpenCv)" == "true" xcopy /I /D /Y "$(OPENCV_PATH)\x64\vc12\bin\opencv_world300.dll" "$(TargetDir)"
@@ -91,7 +88,6 @@ if "$(UseZip)" == "true" if exist "$(ZLIB_PATH)\bin\zlib1.dll" (xcopy /I /D /Y "
     <ClCompile>
       <Optimization>Disabled</Optimization>
       <PreprocessorDefinitions>_DEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>../ReaderLib</AdditionalIncludeDirectories>
     </ClCompile>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="$(ReleaseBuild)">
@@ -101,7 +97,6 @@ if "$(UseZip)" == "true" if exist "$(ZLIB_PATH)\bin\zlib1.dll" (xcopy /I /D /Y "
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <PreprocessorDefinitions>NDEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <AdditionalOptions>/d2Zi+ %(AdditionalOptions)</AdditionalOptions>
-      <AdditionalIncludeDirectories>../ReaderLib</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
