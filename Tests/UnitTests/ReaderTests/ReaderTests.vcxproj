@@ -57,8 +57,8 @@
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup>
     <LinkIncremental>false</LinkIncremental>
-    <IncludePath>..\..\..\Source\Readers\Reader;..\..\..\Source\Common\include;..\..\..\Source\Math;$(IncludePath)</IncludePath>
-    <LibraryPath>$(OutDir);$(LibraryPath)</LibraryPath>
+    <AdditionalIncludePath>..\..\..\Source\Readers\Reader;..\..\..\Source\Common\include;..\..\..\Source\Math;$(AdditionalIncludePath)</AdditionalIncludePath>
+    <AdditionalLibraryDirectories>$(OutDir);$(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
     <OutDir>$(OutDir)\UnitTests\</OutDir>
   </PropertyGroup>
   <ItemDefinitionGroup>

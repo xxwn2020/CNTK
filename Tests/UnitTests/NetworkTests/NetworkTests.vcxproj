@@ -38,18 +38,18 @@
   </PropertyGroup>
   <PropertyGroup Condition="$(DebugBuild)" Label="Configuration">
     <UseDebugLibraries>true</UseDebugLibraries>
-    <IncludePath>..\ActionsLib;..\SequenceTrainingLib;..\SGDLib;..\ComputationNetworkLib;..\Math;..\Common\Include;..\CNTK\BrainScript;$(MSMPI_INC);$(VCInstallDir)include;$(WindowsSDK_IncludePath);</IncludePath>
-    <LibraryPath>$(MSMPI_LIB64);$(SolutionDir)$(Platform)\$(Configuration);$(SolutionDir)..\Common\lib;$(VCInstallDir)lib\amd64;$(WindowsSDK_LibraryPath_x64)</LibraryPath>
+    <AdditionalIncludePath>..\ActionsLib;..\SequenceTrainingLib;..\SGDLib;..\ComputationNetworkLib;..\Math;..\Common\Include;..\CNTK\BrainScript;$(MSMPI_INC);$(VCInstallDir)include;$(WindowsSDK_IncludePath);</AdditionalIncludePath>
+    <AdditionalLibraryDirectories>$(MSMPI_LIB64);$(SolutionDir)$(Platform)\$(Configuration);$(SolutionDir)..\Common\lib;$(VCInstallDir)lib\amd64;$(WindowsSDK_LibraryPath_x64)</AdditionalLibraryDirectories>
   </PropertyGroup>
   <PropertyGroup Condition="$(ReleaseBuild)" Label="Configuration">
     <UseDebugLibraries>false</UseDebugLibraries>
     <WholeProgramOptimization>true</WholeProgramOptimization>
-    <IncludePath>..\ActionsLib;..\SequenceTrainingLib;..\SGDLib;..\ComputationNetworkLib;..\Math;..\Common\Include;..\CNTK\BrainScript;$(MSMPI_INC);$(VCInstallDir)include;$(WindowsSDK_IncludePath);</IncludePath>
-    <LibraryPath>$(MSMPI_LIB64);$(SolutionDir)$(Platform)\$(Configuration);$(SolutionDir)..\Common\lib;$(VCInstallDir)lib\amd64;$(WindowsSDK_LibraryPath_x64)</LibraryPath>
+    <AdditionalIncludePath>..\ActionsLib;..\SequenceTrainingLib;..\SGDLib;..\ComputationNetworkLib;..\Math;..\Common\Include;..\CNTK\BrainScript;$(MSMPI_INC);$(VCInstallDir)include;$(WindowsSDK_IncludePath);</AdditionalIncludePath>
+    <AdditionalLibraryDirectories>$(MSMPI_LIB64);$(SolutionDir)$(Platform)\$(Configuration);$(SolutionDir)..\Common\lib;$(VCInstallDir)lib\amd64;$(WindowsSDK_LibraryPath_x64)</AdditionalLibraryDirectories>
   </PropertyGroup>
   <PropertyGroup Condition="$(GpuBuild)">
-    <IncludePath>$(IncludePath);$(CUDA_PATH)\include</IncludePath>
-    <LibraryPath>$(LibraryPath);$(CUDA_PATH)\lib\$(Platform)</LibraryPath>
+    <AdditionalIncludePath>$(AdditionalIncludePath);$(CUDA_PATH)\include</AdditionalIncludePath>
+    <AdditionalLibraryDirectories>$(AdditionalLibraryDirectories);$(CUDA_PATH)\lib\$(Platform)</AdditionalLibraryDirectories>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
   <ImportGroup Label="ExtensionSettings" />
@@ -59,8 +59,8 @@
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup>
     <LinkIncremental>false</LinkIncremental>
-    <IncludePath>$(VC_IncludePath);$(WindowsSDK_IncludePath);..\..\..\Source\Common\include;..\..\..\Source\Math;..\..\..\Source\ActionsLib;..\..\..\Source\ComputationNetworkLib;..\..\..\Source\CNTK\BrainScript;$(IncludePath)</IncludePath>
-    <LibraryPath>$(OutDir);$(VC_LibraryPath_x64);$(WindowsSDK_LibraryPath_x64);$(LibraryPath)</LibraryPath>
+    <AdditionalIncludePath>$(VC_IncludePath);$(WindowsSDK_IncludePath);..\..\..\Source\Common\include;..\..\..\Source\Math;..\..\..\Source\ActionsLib;..\..\..\Source\ComputationNetworkLib;..\..\..\Source\CNTK\BrainScript;$(AdditionalIncludePath)</AdditionalIncludePath>
+    <AdditionalLibraryDirectories>$(OutDir);$(VC_LibraryPath_x64);$(WindowsSDK_LibraryPath_x64);$(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
     <OutDir>$(OutDir)\UnitTests\</OutDir>
   </PropertyGroup>
   <ItemDefinitionGroup>

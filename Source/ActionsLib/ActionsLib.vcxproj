@@ -41,12 +41,12 @@
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup>
     <LinkIncremental>$(DebugBuild)</LinkIncremental>
-    <IncludePath>..\SequenceTrainingLib;..\SGDLib;..\ComputationNetworkLib;..\CNTK;..\Math;..\Common\Include;..\CNTK\BrainScript;$(MSMPI_INC);$(VCInstallDir)include;$(WindowsSDK_IncludePath)</IncludePath>
-    <LibraryPath>$(MSMPI_LIB64);$(SolutionDir)$(Platform)\$(Configuration);$(SolutionDir)..\Common\lib;$(VCInstallDir)lib\amd64;$(WindowsSDK_LibraryPath_x64)</LibraryPath>
+    <AdditionalIncludeDirectories>..\SequenceTrainingLib;..\SGDLib;..\ComputationNetworkLib;..\CNTK;..\Math;..\Common\Include;..\CNTK\BrainScript;$(MSMPI_INC)</AdditionalIncludeDirectories>
+    <AdditionalLibraryDirectories>$(MSMPI_LIB64)</AdditionalLibraryDirectories>
   </PropertyGroup>
   <PropertyGroup Condition="$(GpuBuild)">
-    <IncludePath>$(IncludePath);$(CUDA_PATH)\include;</IncludePath>
-    <LibraryPath>$(LibraryPath);$(CUDA_PATH)\lib\$(Platform)</LibraryPath>
+    <AdditionalIncludeDirectories>$(CUDA_PATH)\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+    <AdditionalLibraryDirectories>$(CUDA_PATH)\lib\$(Platform);%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
   </PropertyGroup>
   <ItemDefinitionGroup>
     <ClCompile>

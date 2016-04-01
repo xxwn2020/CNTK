@@ -38,7 +38,7 @@
   </ImportGroup>
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup>
-    <IncludePath>$(VC_IncludePath);$(WindowsSDK_IncludePath);..\Common\Include;..\Math</IncludePath>
+    <AdditionalIncludePath>$(VC_IncludePath);$(WindowsSDK_IncludePath);..\Common\Include;..\Math</AdditionalIncludePath>
   </PropertyGroup>
   <ItemDefinitionGroup>
     <ClCompile>

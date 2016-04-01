@@ -56,8 +56,8 @@
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup>
     <LinkIncremental>$(DebugBuild)</LinkIncremental>
-    <IncludePath>..\..\common\include;..\..\math;$(OPENCV_PATH)\include;$(ZipInclude);$(IncludePath);</IncludePath>
-    <LibraryPath>$(SolutionDir)$(Platform)\$(Configuration);$(OPENCV_PATH)\x64\vc12\lib;$(ZipLibPath);$(LibraryPath);</LibraryPath>
+    <AdditionalIncludePath>..\..\common\include;..\..\math;$(OPENCV_PATH)\include;$(ZipInclude);$(AdditionalIncludePath);</AdditionalIncludePath>
+    <AdditionalLibraryDirectories>$(SolutionDir)$(Platform)\$(Configuration);$(OPENCV_PATH)\x64\vc12\lib;$(ZipLibPath);$(AdditionalLibraryDirectories);</AdditionalLibraryDirectories>
     <OpenCVLib Condition="$(HasOpenCV)">opencv_world300.lib</OpenCVLib>
   </PropertyGroup>
   <ItemDefinitionGroup>

@@ -45,7 +45,7 @@
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup>
     <LinkIncremental>$(DebugBuild)</LinkIncremental>
-    <IncludePath>..\..\..\Source\Common\include\;$(VCInstallDir)include;$(WindowsSDK_IncludePath);</IncludePath>
+    <AdditionalIncludePath>..\..\..\Source\Common\include\;$(VCInstallDir)include;$(WindowsSDK_IncludePath);</AdditionalIncludePath>
   </PropertyGroup>
   <ItemDefinitionGroup>
     <ClCompile>

@@ -50,8 +50,8 @@
     </Otherwise>
   </Choose>
   <PropertyGroup>
-    <IncludePath>..\Common\include;$(ACML_PATH)\include;$(CudaPath)\include;$(CUB_PATH);$(CuDnnIncPath);$(IncludePath)</IncludePath>
-    <LibraryPath>$(SolutionDir)$(Platform)\$(Configuration);$(ACML_PATH)\lib;$(CudaPath)\lib\$(Platform);$(CuDnnLibPath);$(LibraryPath)</LibraryPath>
+    <AdditionalIncludePath>..\Common\include;$(ACML_PATH)\include;$(CudaPath)\include;$(CUB_PATH);$(CuDnnIncPath)</AdditionalIncludePath>
+    <AdditionalLibraryDirectories>$(SolutionDir)$(Platform)\$(Configuration);$(ACML_PATH)\lib;$(CudaPath)\lib\$(Platform);$(CuDnnLibPath)</AdditionalLibraryDirectories>
     <IntDir>$(IntDir)\MathCUDA\</IntDir>
   </PropertyGroup>
   <ImportGroup Label="ExtensionSettings">

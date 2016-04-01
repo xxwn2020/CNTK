@@ -51,12 +51,12 @@
   <PropertyGroup>
     <!-- TODO intentional for all? -->
     <LinkIncremental>false</LinkIncremental>
-    <IncludePath>..\Common\include;$(ACML_PATH)\include;$(IncludePath)</IncludePath>
-    <LibraryPath>$(SolutionDir)$(Platform)\$(Configuration);$(ACML_PATH)\lib;$(LibraryPath)</LibraryPath>
+    <AdditionalIncludePath>..\Common\include;$(ACML_PATH)\include;$(AdditionalIncludePath)</AdditionalIncludePath>
+    <AdditionalLibraryDirectories>$(SolutionDir)$(Platform)\$(Configuration);$(ACML_PATH)\lib;$(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
   </PropertyGroup>
   <PropertyGroup Condition="$(GpuBuild)">
-    <IncludePath>$(IncludePath);$(CUDA_PATH)\include</IncludePath>
-    <LibraryPath>$(LibraryPath);$(CUDA_PATH)\lib\$(Platform)</LibraryPath>
+    <AdditionalIncludePath>$(AdditionalIncludePath);$(CUDA_PATH)\include</AdditionalIncludePath>
+    <AdditionalLibraryDirectories>$(AdditionalLibraryDirectories);$(CUDA_PATH)\lib\$(Platform)</AdditionalLibraryDirectories>
   </PropertyGroup>
   <ItemDefinitionGroup>
     <ClCompile>

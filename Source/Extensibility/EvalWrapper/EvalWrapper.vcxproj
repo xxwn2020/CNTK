@@ -49,8 +49,8 @@
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup>
     <LinkIncremental>$(DebugBuild)</LinkIncremental>
-    <IncludePath>$(VC_IncludePath);$(WindowsSDK_IncludePath);$(SolutionDir)Source\Common\Include</IncludePath>
-    <LibraryPath>$(SolutionDir)$(Platform)\$(Configuration)\;$(LibraryPath)</LibraryPath>
+    <AdditionalIncludePath>$(SolutionDir)Source\Common\Include</AdditionalIncludePath>
+    <AdditionalLibraryDirectories>$(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="$(DebugBuild)">
     <ClCompile>
