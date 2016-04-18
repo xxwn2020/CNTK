@@ -111,6 +111,19 @@ Sequences BlockRandomizer::GetNextSequences(size_t sampleCount)
     std::vector<RandomizedSequenceDescription> decimated;
     decimated.reserve(sequences.size());
     Decimate(sequences, decimated);
+
+    fprintf(stderr, "BlockRandomizer::GetNextSequences(): getting %d out of %d sequences for %d requested samples in sweep %d\n",
+        (int)sequences.size(),
+        (int)decimated.size(),
+        (int)sampleCount,
+        (int)m_sweep);
+
+#if 0
+    if (verbosity > 0)
+        fprintf(stderr, "getbatch: getting utterances %d..%d (%d subset of %d frames out of %d requested) in sweep %d\n",
+        (int)spos, (int)(epos - 1), (int)tspos, (int)mbframes, (int)framesrequested, (int)sweep);
+#endif
+
     if (decimated.size() == 0)
     {
         return result;

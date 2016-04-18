@@ -1,0 +1,15 @@
+To do
+  WriteBottleneck
+  WriteScaledLogLike
+  TrainMultiInput: EXCEPTION occurred: parsedpath: this mode requires an input script with start and end frames given
+  EvalSimpleNetwork: EXCEPTION occurred: parsedpath: this mode requires an input script with start and end frames given
+  CrossValidateSimpleNetwork TODO readMethod=rollingWindow
+
+DONE
+  AdaptLearnRate
+  TrainAutoEncoder
+  TrainLstm
+  TrainMultiTask
+  TrainNdlNetwork
+  TrainSimpleNetwork
+  TrainWithPreTrain
