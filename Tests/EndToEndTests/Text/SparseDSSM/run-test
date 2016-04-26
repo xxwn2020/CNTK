@@ -23,17 +23,15 @@ cp -R $DataSourceDir/* $DataDir || exit $?
 
 ConfigDir=$TEST_DIR/
 LogFileName=stderr
-Instances=4
+Instances=2
 NumCPUThreads=$(threadsPerInstance $Instances)
 
 # cntkrun <CNTK config file name> <additional CNTK args>
 DeleteModelsAfterTest=0
-cntkmpirun "-n $Instances" dssm.cntk "numCPUThreads=$NumCPUThreads"
+cntkmpirun "-n $Instances" dssm.cntk "numCPUThreads=1"
 ExitCode=$?
 sed 's/^/MPI Rank 0: /' $TEST_RUN_DIR/"$LogFileName"_train.logrank0
 sed 's/^/MPI Rank 1: /' $TEST_RUN_DIR/"$LogFileName"_train.logrank1
-sed 's/^/MPI Rank 2: /' $TEST_RUN_DIR/"$LogFileName"_train.logrank2
-sed 's/^/MPI Rank 3: /' $TEST_RUN_DIR/"$LogFileName"_train.logrank3
 if [ "$ExitCode" != "0" ]; then
     exit $ExitCode
 fi
@@ -44,10 +42,8 @@ echo ==== Re-running from checkpoint
 DeleteExistingModels=0
 # cntkrun <CNTK config file name> <additional CNTK args>
 DeleteModelsAfterTest=1
-cntkmpirun "-n $Instances" dssm.cntk "numCPUThreads=$NumCPUThreads"
+cntkmpirun "-n $Instances" dssm.cntk "numCPUThreads=1"
 ExitCode=$?
 sed 's/^/MPI Rank 0: /' $TEST_RUN_DIR/"$LogFileName"_train.logrank0
 sed 's/^/MPI Rank 1: /' $TEST_RUN_DIR/"$LogFileName"_train.logrank1
-sed 's/^/MPI Rank 2: /' $TEST_RUN_DIR/"$LogFileName"_train.logrank2
-sed 's/^/MPI Rank 3: /' $TEST_RUN_DIR/"$LogFileName"_train.logrank3
 exit $ExitCode
