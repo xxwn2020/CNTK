@@ -188,3 +188,7 @@ Source/CNTK/buildinfo.h$$
 # Unit test output
 Tests/UnitTests/ReaderTests/Control/**/*_Output.txt
 Tests/UnitTests/NetworkTests/Output/
+
+# Example log
+Examples/Image/Miscellaneous/CIFAR-10/Output
+Examples/Image/Miscellaneous/CIFAR-10/Output_Debug
