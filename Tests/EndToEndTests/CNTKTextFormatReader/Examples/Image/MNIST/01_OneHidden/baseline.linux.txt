@@ -1,8 +1,8 @@
-=== Running /home/alrezni/src/cntk_git/build/release/bin/cntk configFile=/home/alrezni/src/cntk_git/Tests/EndToEndTests/CNTKTextFormatReader/Examples/Image/MNIST/01_OneHidden/../Config/01_OneHidden.cntk currentDirectory=/tmp/cntk-test-20160427155206.337033/CNTKTextFormatReader/Examples/Image/MNIST_01_OneHidden@release_gpu/TestData RunDir=/tmp/cntk-test-20160427155206.337033/CNTKTextFormatReader/Examples/Image/MNIST_01_OneHidden@release_gpu DataDir=/tmp/cntk-test-20160427155206.337033/CNTKTextFormatReader/Examples/Image/MNIST_01_OneHidden@release_gpu/TestData ConfigDir=/home/alrezni/src/cntk_git/Tests/EndToEndTests/CNTKTextFormatReader/Examples/Image/MNIST/01_OneHidden/../Config OutputDir=/tmp/cntk-test-20160427155206.337033/CNTKTextFormatReader/Examples/Image/MNIST_01_OneHidden@release_gpu DeviceId=0 timestamping=true train=[SGD=[maxEpochs=3]] imageLayout="cudnn"
+=== Running /home/alrezni/src/cntk_git/build/release/bin/cntk configFile=/home/alrezni/src/cntk_git/Tests/EndToEndTests/CNTKTextFormatReader/Examples/Image/MNIST/01_OneHidden/../../../../../../../Examples/Image/MNIST/Config/../../../../Tests/EndToEndTests/CNTKTextFormatReader/Examples/Image/MNIST/Config/01_OneHidden.cntk currentDirectory=/tmp/cntk-test-20160503152234.597575/CNTKTextFormatReader/Examples/Image/MNIST_01_OneHidden@release_gpu/TestData RunDir=/tmp/cntk-test-20160503152234.597575/CNTKTextFormatReader/Examples/Image/MNIST_01_OneHidden@release_gpu DataDir=/tmp/cntk-test-20160503152234.597575/CNTKTextFormatReader/Examples/Image/MNIST_01_OneHidden@release_gpu/TestData ConfigDir=/home/alrezni/src/cntk_git/Tests/EndToEndTests/CNTKTextFormatReader/Examples/Image/MNIST/01_OneHidden/../../../../../../../Examples/Image/MNIST/Config OutputDir=/tmp/cntk-test-20160503152234.597575/CNTKTextFormatReader/Examples/Image/MNIST_01_OneHidden@release_gpu DeviceId=0 timestamping=true train=[SGD=[maxEpochs=3]] imageLayout="cudnn"
 -------------------------------------------------------------------
 Build info: 
 
-		Built time: Apr 26 2016 17:04:28
+		Built time: May  3 2016 15:08:09
 		Last modified date: Tue Apr  5 16:01:37 2016
 		Build type: release
 		Build target: GPU
@@ -12,37 +12,37 @@ Build info:
 		CUB_PATH: /usr/local/cub-1.4.1
 		CUDNN_PATH: /usr/local/cudnn-4.0
 		Build Branch: alrezni/examples_text
-		Build SHA1: 780d0d14f555f568d393793562f374f04af79a73
+		Build SHA1: e80dab7d66009531806ce70b4842146e0da00516
 		Built by alrezni on atleneu04
 		Build Path: /home/alrezni/src/cntk_git
 -------------------------------------------------------------------
-Changed current directory to /tmp/cntk-test-20160427155206.337033/CNTKTextFormatReader/Examples/Image/MNIST_01_OneHidden@release_gpu/TestData
-04/27/2016 15:52:06: -------------------------------------------------------------------
-04/27/2016 15:52:06: Build info: 
+Changed current directory to /tmp/cntk-test-20160503152234.597575/CNTKTextFormatReader/Examples/Image/MNIST_01_OneHidden@release_gpu/TestData
+05/03/2016 15:23:18: -------------------------------------------------------------------
+05/03/2016 15:23:18: Build info: 
 
-04/27/2016 15:52:06: 		Built time: Apr 26 2016 17:04:28
-04/27/2016 15:52:06: 		Last modified date: Tue Apr  5 16:01:37 2016
-04/27/2016 15:52:06: 		Build type: release
-04/27/2016 15:52:06: 		Build target: GPU
-04/27/2016 15:52:06: 		With 1bit-SGD: yes
-04/27/2016 15:52:06: 		Math lib: acml
-04/27/2016 15:52:06: 		CUDA_PATH: /usr/local/cuda-7.0
-04/27/2016 15:52:06: 		CUB_PATH: /usr/local/cub-1.4.1
-04/27/2016 15:52:06: 		CUDNN_PATH: /usr/local/cudnn-4.0
-04/27/2016 15:52:06: 		Build Branch: alrezni/examples_text
-04/27/2016 15:52:06: 		Build SHA1: 780d0d14f555f568d393793562f374f04af79a73
-04/27/2016 15:52:06: 		Built by alrezni on atleneu04
-04/27/2016 15:52:06: 		Build Path: /home/alrezni/src/cntk_git
-04/27/2016 15:52:06: -------------------------------------------------------------------
+05/03/2016 15:23:18: 		Built time: May  3 2016 15:08:09
+05/03/2016 15:23:18: 		Last modified date: Tue Apr  5 16:01:37 2016
+05/03/2016 15:23:18: 		Build type: release
+05/03/2016 15:23:18: 		Build target: GPU
+05/03/2016 15:23:18: 		With 1bit-SGD: yes
+05/03/2016 15:23:18: 		Math lib: acml
+05/03/2016 15:23:18: 		CUDA_PATH: /usr/local/cuda-7.0
+05/03/2016 15:23:18: 		CUB_PATH: /usr/local/cub-1.4.1
+05/03/2016 15:23:18: 		CUDNN_PATH: /usr/local/cudnn-4.0
+05/03/2016 15:23:18: 		Build Branch: alrezni/examples_text
+05/03/2016 15:23:18: 		Build SHA1: e80dab7d66009531806ce70b4842146e0da00516
+05/03/2016 15:23:18: 		Built by alrezni on atleneu04
+05/03/2016 15:23:18: 		Build Path: /home/alrezni/src/cntk_git
+05/03/2016 15:23:18: -------------------------------------------------------------------
 
-04/27/2016 15:52:06: Running on localhost at 2016/04/27 15:52:06
-04/27/2016 15:52:06: Command line: 
-/home/alrezni/src/cntk_git/build/release/bin/cntk  configFile=/home/alrezni/src/cntk_git/Tests/EndToEndTests/CNTKTextFormatReader/Examples/Image/MNIST/01_OneHidden/../Config/01_OneHidden.cntk  currentDirectory=/tmp/cntk-test-20160427155206.337033/CNTKTextFormatReader/Examples/Image/MNIST_01_OneHidden@release_gpu/TestData  RunDir=/tmp/cntk-test-20160427155206.337033/CNTKTextFormatReader/Examples/Image/MNIST_01_OneHidden@release_gpu  DataDir=/tmp/cntk-test-20160427155206.337033/CNTKTextFormatReader/Examples/Image/MNIST_01_OneHidden@release_gpu/TestData  ConfigDir=/home/alrezni/src/cntk_git/Tests/EndToEndTests/CNTKTextFormatReader/Examples/Image/MNIST/01_OneHidden/../Config  OutputDir=/tmp/cntk-test-20160427155206.337033/CNTKTextFormatReader/Examples/Image/MNIST_01_OneHidden@release_gpu  DeviceId=0  timestamping=true  train=[SGD=[maxEpochs=3]]  imageLayout="cudnn"
+05/03/2016 15:23:18: Running on localhost at 2016/05/03 15:23:18
+05/03/2016 15:23:18: Command line: 
+/home/alrezni/src/cntk_git/build/release/bin/cntk  configFile=/home/alrezni/src/cntk_git/Tests/EndToEndTests/CNTKTextFormatReader/Examples/Image/MNIST/01_OneHidden/../../../../../../../Examples/Image/MNIST/Config/../../../../Tests/EndToEndTests/CNTKTextFormatReader/Examples/Image/MNIST/Config/01_OneHidden.cntk  currentDirectory=/tmp/cntk-test-20160503152234.597575/CNTKTextFormatReader/Examples/Image/MNIST_01_OneHidden@release_gpu/TestData  RunDir=/tmp/cntk-test-20160503152234.597575/CNTKTextFormatReader/Examples/Image/MNIST_01_OneHidden@release_gpu  DataDir=/tmp/cntk-test-20160503152234.597575/CNTKTextFormatReader/Examples/Image/MNIST_01_OneHidden@release_gpu/TestData  ConfigDir=/home/alrezni/src/cntk_git/Tests/EndToEndTests/CNTKTextFormatReader/Examples/Image/MNIST/01_OneHidden/../../../../../../../Examples/Image/MNIST/Config  OutputDir=/tmp/cntk-test-20160503152234.597575/CNTKTextFormatReader/Examples/Image/MNIST_01_OneHidden@release_gpu  DeviceId=0  timestamping=true  train=[SGD=[maxEpochs=3]]  imageLayout="cudnn"
 
 
 
-04/27/2016 15:52:06: >>>>>>>>>>>>>>>>>>>> RAW CONFIG (VARIABLES NOT RESOLVED) >>>>>>>>>>>>>>>>>>>>
-04/27/2016 15:52:06: RootDir = ".."
+05/03/2016 15:23:18: >>>>>>>>>>>>>>>>>>>> RAW CONFIG (VARIABLES NOT RESOLVED) >>>>>>>>>>>>>>>>>>>>
+05/03/2016 15:23:18: RootDir = ".."
 ConfigDir = "$RootDir$/Config"
 DataDir   = "$RootDir$/Data"
 OutputDir = "$RootDir$/Output"
@@ -101,37 +101,37 @@ test = [
         ]
     ]
 ]
-currentDirectory=/tmp/cntk-test-20160427155206.337033/CNTKTextFormatReader/Examples/Image/MNIST_01_OneHidden@release_gpu/TestData
-RunDir=/tmp/cntk-test-20160427155206.337033/CNTKTextFormatReader/Examples/Image/MNIST_01_OneHidden@release_gpu
-DataDir=/tmp/cntk-test-20160427155206.337033/CNTKTextFormatReader/Examples/Image/MNIST_01_OneHidden@release_gpu/TestData
-ConfigDir=/home/alrezni/src/cntk_git/Tests/EndToEndTests/CNTKTextFormatReader/Examples/Image/MNIST/01_OneHidden/../Config
-OutputDir=/tmp/cntk-test-20160427155206.337033/CNTKTextFormatReader/Examples/Image/MNIST_01_OneHidden@release_gpu
+currentDirectory=/tmp/cntk-test-20160503152234.597575/CNTKTextFormatReader/Examples/Image/MNIST_01_OneHidden@release_gpu/TestData
+RunDir=/tmp/cntk-test-20160503152234.597575/CNTKTextFormatReader/Examples/Image/MNIST_01_OneHidden@release_gpu
+DataDir=/tmp/cntk-test-20160503152234.597575/CNTKTextFormatReader/Examples/Image/MNIST_01_OneHidden@release_gpu/TestData
+ConfigDir=/home/alrezni/src/cntk_git/Tests/EndToEndTests/CNTKTextFormatReader/Examples/Image/MNIST/01_OneHidden/../../../../../../../Examples/Image/MNIST/Config
+OutputDir=/tmp/cntk-test-20160503152234.597575/CNTKTextFormatReader/Examples/Image/MNIST_01_OneHidden@release_gpu
 DeviceId=0
 timestamping=true
 train=[SGD=[maxEpochs=3]]
 imageLayout="cudnn"
 
-04/27/2016 15:52:06: <<<<<<<<<<<<<<<<<<<< RAW CONFIG (VARIABLES NOT RESOLVED)  <<<<<<<<<<<<<<<<<<<<
+05/03/2016 15:23:18: <<<<<<<<<<<<<<<<<<<< RAW CONFIG (VARIABLES NOT RESOLVED)  <<<<<<<<<<<<<<<<<<<<
 
-04/27/2016 15:52:06: >>>>>>>>>>>>>>>>>>>> RAW CONFIG WITH ALL VARIABLES RESOLVED >>>>>>>>>>>>>>>>>>>>
-04/27/2016 15:52:06: RootDir = ".."
+05/03/2016 15:23:18: >>>>>>>>>>>>>>>>>>>> RAW CONFIG WITH ALL VARIABLES RESOLVED >>>>>>>>>>>>>>>>>>>>
+05/03/2016 15:23:18: RootDir = ".."
 ConfigDir = "../Config"
 DataDir   = "../Data"
 OutputDir = "../Output"
-ModelDir  = "/tmp/cntk-test-20160427155206.337033/CNTKTextFormatReader/Examples/Image/MNIST_01_OneHidden@release_gpu/Models"
+ModelDir  = "/tmp/cntk-test-20160503152234.597575/CNTKTextFormatReader/Examples/Image/MNIST_01_OneHidden@release_gpu/Models"
 deviceId = 0
 imageLayout = "cudnn"
 command = train:test
 precision = "float"
-modelPath = "/tmp/cntk-test-20160427155206.337033/CNTKTextFormatReader/Examples/Image/MNIST_01_OneHidden@release_gpu/Models/01_OneHidden"
-ndlMacros = "/home/alrezni/src/cntk_git/Tests/EndToEndTests/CNTKTextFormatReader/Examples/Image/MNIST/01_OneHidden/../Config/Macros.ndl"
+modelPath = "/tmp/cntk-test-20160503152234.597575/CNTKTextFormatReader/Examples/Image/MNIST_01_OneHidden@release_gpu/Models/01_OneHidden"
+ndlMacros = "/home/alrezni/src/cntk_git/Tests/EndToEndTests/CNTKTextFormatReader/Examples/Image/MNIST/01_OneHidden/../../../../../../../Examples/Image/MNIST/Config/Macros.ndl"
 traceLevel=1
 numMBsToShowResult=500
 initOnCPUOnly=true
 train = [
     action = "train"
     NDLNetworkBuilder = [
-        networkDescription = "/home/alrezni/src/cntk_git/Tests/EndToEndTests/CNTKTextFormatReader/Examples/Image/MNIST/01_OneHidden/../Config/01_OneHidden.ndl"
+        networkDescription = "/home/alrezni/src/cntk_git/Tests/EndToEndTests/CNTKTextFormatReader/Examples/Image/MNIST/01_OneHidden/../../../../../../../Examples/Image/MNIST/Config/01_OneHidden.ndl"
     ]
     SGD = [
         epochSize = 60000
@@ -142,7 +142,7 @@ train = [
     ]
     reader = [
         readerType = "CNTKTextFormatReader"
-        file = "/tmp/cntk-test-20160427155206.337033/CNTKTextFormatReader/Examples/Image/MNIST_01_OneHidden@release_gpu/TestData/Train-28x28_cntk_text.txt"
+        file = "/tmp/cntk-test-20160503152234.597575/CNTKTextFormatReader/Examples/Image/MNIST_01_OneHidden@release_gpu/TestData/Train-28x28_cntk_text.txt"
         input = [
             features = [
                 dim = 784
@@ -160,7 +160,7 @@ test = [
     minibatchSize = 16
     reader = [
         readerType = "CNTKTextFormatReader"
-        file = "/tmp/cntk-test-20160427155206.337033/CNTKTextFormatReader/Examples/Image/MNIST_01_OneHidden@release_gpu/TestData/Test-28x28_cntk_text.txt"
+        file = "/tmp/cntk-test-20160503152234.597575/CNTKTextFormatReader/Examples/Image/MNIST_01_OneHidden@release_gpu/TestData/Test-28x28_cntk_text.txt"
         input = [
             features = [
                 dim = 784
@@ -173,40 +173,40 @@ test = [
         ]
     ]
 ]
-currentDirectory=/tmp/cntk-test-20160427155206.337033/CNTKTextFormatReader/Examples/Image/MNIST_01_OneHidden@release_gpu/TestData
-RunDir=/tmp/cntk-test-20160427155206.337033/CNTKTextFormatReader/Examples/Image/MNIST_01_OneHidden@release_gpu
-DataDir=/tmp/cntk-test-20160427155206.337033/CNTKTextFormatReader/Examples/Image/MNIST_01_OneHidden@release_gpu/TestData
-ConfigDir=/home/alrezni/src/cntk_git/Tests/EndToEndTests/CNTKTextFormatReader/Examples/Image/MNIST/01_OneHidden/../Config
-OutputDir=/tmp/cntk-test-20160427155206.337033/CNTKTextFormatReader/Examples/Image/MNIST_01_OneHidden@release_gpu
+currentDirectory=/tmp/cntk-test-20160503152234.597575/CNTKTextFormatReader/Examples/Image/MNIST_01_OneHidden@release_gpu/TestData
+RunDir=/tmp/cntk-test-20160503152234.597575/CNTKTextFormatReader/Examples/Image/MNIST_01_OneHidden@release_gpu
+DataDir=/tmp/cntk-test-20160503152234.597575/CNTKTextFormatReader/Examples/Image/MNIST_01_OneHidden@release_gpu/TestData
+ConfigDir=/home/alrezni/src/cntk_git/Tests/EndToEndTests/CNTKTextFormatReader/Examples/Image/MNIST/01_OneHidden/../../../../../../../Examples/Image/MNIST/Config
+OutputDir=/tmp/cntk-test-20160503152234.597575/CNTKTextFormatReader/Examples/Image/MNIST_01_OneHidden@release_gpu
 DeviceId=0
 timestamping=true
 train=[SGD=[maxEpochs=3]]
 imageLayout="cudnn"
 
-04/27/2016 15:52:06: <<<<<<<<<<<<<<<<<<<< RAW CONFIG WITH ALL VARIABLES RESOLVED <<<<<<<<<<<<<<<<<<<<
+05/03/2016 15:23:18: <<<<<<<<<<<<<<<<<<<< RAW CONFIG WITH ALL VARIABLES RESOLVED <<<<<<<<<<<<<<<<<<<<
 
-04/27/2016 15:52:06: >>>>>>>>>>>>>>>>>>>> PROCESSED CONFIG WITH ALL VARIABLES RESOLVED >>>>>>>>>>>>>>>>>>>>
+05/03/2016 15:23:18: >>>>>>>>>>>>>>>>>>>> PROCESSED CONFIG WITH ALL VARIABLES RESOLVED >>>>>>>>>>>>>>>>>>>>
 configparameters: 01_OneHidden.cntk:command=train:test
-configparameters: 01_OneHidden.cntk:ConfigDir=/home/alrezni/src/cntk_git/Tests/EndToEndTests/CNTKTextFormatReader/Examples/Image/MNIST/01_OneHidden/../Config
-configparameters: 01_OneHidden.cntk:currentDirectory=/tmp/cntk-test-20160427155206.337033/CNTKTextFormatReader/Examples/Image/MNIST_01_OneHidden@release_gpu/TestData
-configparameters: 01_OneHidden.cntk:DataDir=/tmp/cntk-test-20160427155206.337033/CNTKTextFormatReader/Examples/Image/MNIST_01_OneHidden@release_gpu/TestData
+configparameters: 01_OneHidden.cntk:ConfigDir=/home/alrezni/src/cntk_git/Tests/EndToEndTests/CNTKTextFormatReader/Examples/Image/MNIST/01_OneHidden/../../../../../../../Examples/Image/MNIST/Config
+configparameters: 01_OneHidden.cntk:currentDirectory=/tmp/cntk-test-20160503152234.597575/CNTKTextFormatReader/Examples/Image/MNIST_01_OneHidden@release_gpu/TestData
+configparameters: 01_OneHidden.cntk:DataDir=/tmp/cntk-test-20160503152234.597575/CNTKTextFormatReader/Examples/Image/MNIST_01_OneHidden@release_gpu/TestData
 configparameters: 01_OneHidden.cntk:deviceId=0
 configparameters: 01_OneHidden.cntk:imageLayout=cudnn
 configparameters: 01_OneHidden.cntk:initOnCPUOnly=true
-configparameters: 01_OneHidden.cntk:ModelDir=/tmp/cntk-test-20160427155206.337033/CNTKTextFormatReader/Examples/Image/MNIST_01_OneHidden@release_gpu/Models
-configparameters: 01_OneHidden.cntk:modelPath=/tmp/cntk-test-20160427155206.337033/CNTKTextFormatReader/Examples/Image/MNIST_01_OneHidden@release_gpu/Models/01_OneHidden
-configparameters: 01_OneHidden.cntk:ndlMacros=/home/alrezni/src/cntk_git/Tests/EndToEndTests/CNTKTextFormatReader/Examples/Image/MNIST/01_OneHidden/../Config/Macros.ndl
+configparameters: 01_OneHidden.cntk:ModelDir=/tmp/cntk-test-20160503152234.597575/CNTKTextFormatReader/Examples/Image/MNIST_01_OneHidden@release_gpu/Models
+configparameters: 01_OneHidden.cntk:modelPath=/tmp/cntk-test-20160503152234.597575/CNTKTextFormatReader/Examples/Image/MNIST_01_OneHidden@release_gpu/Models/01_OneHidden
+configparameters: 01_OneHidden.cntk:ndlMacros=/home/alrezni/src/cntk_git/Tests/EndToEndTests/CNTKTextFormatReader/Examples/Image/MNIST/01_OneHidden/../../../../../../../Examples/Image/MNIST/Config/Macros.ndl
 configparameters: 01_OneHidden.cntk:numMBsToShowResult=500
-configparameters: 01_OneHidden.cntk:OutputDir=/tmp/cntk-test-20160427155206.337033/CNTKTextFormatReader/Examples/Image/MNIST_01_OneHidden@release_gpu
+configparameters: 01_OneHidden.cntk:OutputDir=/tmp/cntk-test-20160503152234.597575/CNTKTextFormatReader/Examples/Image/MNIST_01_OneHidden@release_gpu
 configparameters: 01_OneHidden.cntk:precision=float
 configparameters: 01_OneHidden.cntk:RootDir=..
-configparameters: 01_OneHidden.cntk:RunDir=/tmp/cntk-test-20160427155206.337033/CNTKTextFormatReader/Examples/Image/MNIST_01_OneHidden@release_gpu
+configparameters: 01_OneHidden.cntk:RunDir=/tmp/cntk-test-20160503152234.597575/CNTKTextFormatReader/Examples/Image/MNIST_01_OneHidden@release_gpu
 configparameters: 01_OneHidden.cntk:test=[
     action = "test"
     minibatchSize = 16
     reader = [
         readerType = "CNTKTextFormatReader"
-        file = "/tmp/cntk-test-20160427155206.337033/CNTKTextFormatReader/Examples/Image/MNIST_01_OneHidden@release_gpu/TestData/Test-28x28_cntk_text.txt"
+        file = "/tmp/cntk-test-20160503152234.597575/CNTKTextFormatReader/Examples/Image/MNIST_01_OneHidden@release_gpu/TestData/Test-28x28_cntk_text.txt"
         input = [
             features = [
                 dim = 784
@@ -225,7 +225,7 @@ configparameters: 01_OneHidden.cntk:traceLevel=1
 configparameters: 01_OneHidden.cntk:train=[
     action = "train"
     NDLNetworkBuilder = [
-        networkDescription = "/home/alrezni/src/cntk_git/Tests/EndToEndTests/CNTKTextFormatReader/Examples/Image/MNIST/01_OneHidden/../Config/01_OneHidden.ndl"
+        networkDescription = "/home/alrezni/src/cntk_git/Tests/EndToEndTests/CNTKTextFormatReader/Examples/Image/MNIST/01_OneHidden/../../../../../../../Examples/Image/MNIST/Config/01_OneHidden.ndl"
     ]
     SGD = [
         epochSize = 60000
@@ -236,7 +236,7 @@ configparameters: 01_OneHidden.cntk:train=[
     ]
     reader = [
         readerType = "CNTKTextFormatReader"
-        file = "/tmp/cntk-test-20160427155206.337033/CNTKTextFormatReader/Examples/Image/MNIST_01_OneHidden@release_gpu/TestData/Train-28x28_cntk_text.txt"
+        file = "/tmp/cntk-test-20160503152234.597575/CNTKTextFormatReader/Examples/Image/MNIST_01_OneHidden@release_gpu/TestData/Train-28x28_cntk_text.txt"
         input = [
             features = [
                 dim = 784
@@ -250,30 +250,30 @@ configparameters: 01_OneHidden.cntk:train=[
     ]   
 ] [SGD=[maxEpochs=3]]
 
-04/27/2016 15:52:06: <<<<<<<<<<<<<<<<<<<< PROCESSED CONFIG WITH ALL VARIABLES RESOLVED <<<<<<<<<<<<<<<<<<<<
-04/27/2016 15:52:06: Commands: train test
-04/27/2016 15:52:06: Precision = "float"
-04/27/2016 15:52:06: CNTKModelPath: /tmp/cntk-test-20160427155206.337033/CNTKTextFormatReader/Examples/Image/MNIST_01_OneHidden@release_gpu/Models/01_OneHidden
-04/27/2016 15:52:06: CNTKCommandTrainInfo: train : 3
-04/27/2016 15:52:06: CNTKCommandTrainInfo: CNTKNoMoreCommands_Total : 3
+05/03/2016 15:23:18: <<<<<<<<<<<<<<<<<<<< PROCESSED CONFIG WITH ALL VARIABLES RESOLVED <<<<<<<<<<<<<<<<<<<<
+05/03/2016 15:23:18: Commands: train test
+05/03/2016 15:23:18: Precision = "float"
+05/03/2016 15:23:18: CNTKModelPath: /tmp/cntk-test-20160503152234.597575/CNTKTextFormatReader/Examples/Image/MNIST_01_OneHidden@release_gpu/Models/01_OneHidden
+05/03/2016 15:23:18: CNTKCommandTrainInfo: train : 3
+05/03/2016 15:23:18: CNTKCommandTrainInfo: CNTKNoMoreCommands_Total : 3
 
-04/27/2016 15:52:06: ##############################################################################
-04/27/2016 15:52:06: #                                                                            #
-04/27/2016 15:52:06: # Action "train"                                                             #
-04/27/2016 15:52:06: #                                                                            #
-04/27/2016 15:52:06: ##############################################################################
+05/03/2016 15:23:18: ##############################################################################
+05/03/2016 15:23:18: #                                                                            #
+05/03/2016 15:23:18: # Action "train"                                                             #
+05/03/2016 15:23:18: #                                                                            #
+05/03/2016 15:23:18: ##############################################################################
 
-04/27/2016 15:52:06: CNTKCommandTrainBegin: train
+05/03/2016 15:23:18: CNTKCommandTrainBegin: train
 NDLBuilder Using GPU 0
 
-04/27/2016 15:52:06: Creating virgin network.
+05/03/2016 15:23:18: Creating virgin network.
 
 Post-processing network...
 
 4 roots:
 	ce = CrossEntropyWithSoftmax()
 	err = ErrorPrediction()
-	errTop5 = ErrorPrediction()
+	errTop1 = ErrorPrediction()
 	ol.z = Plus()
 
 Validating network. 17 nodes to process in pass 1.
@@ -294,7 +294,7 @@ Validating --> ol.z = Plus (ol.t, ol.b) : [10 x 1 x *], [10 x 1] -> [10 x 1 x *]
 Validating --> ce = CrossEntropyWithSoftmax (labels, ol.z) : [10 x *], [10 x 1 x *] -> [1]
 Validating --> err = ErrorPrediction (labels, ol.z) : [10 x *], [10 x 1 x *] -> [1]
 Validating --> unnamed81 = LearnableParameter() :  -> [1 x 1]
-Validating --> errTop5 = ErrorPrediction (labels, ol.z, unnamed81) : [10 x *], [10 x 1 x *], [1 x 1] -> [1]
+Validating --> errTop1 = ErrorPrediction (labels, ol.z, unnamed81) : [10 x *], [10 x 1 x *], [1 x 1] -> [1]
 
 Validating network. 9 nodes to process in pass 2.
 
@@ -307,91 +307,83 @@ Validating network, final pass.
 
 Post-processing network complete.
 
-04/27/2016 15:52:07: Created model with 17 nodes on GPU 0.
+05/03/2016 15:23:18: Created model with 17 nodes on GPU 0.
 
-04/27/2016 15:52:07: Training criterion node(s):
-04/27/2016 15:52:07: 	ce = CrossEntropyWithSoftmax
+05/03/2016 15:23:18: Training criterion node(s):
+05/03/2016 15:23:18: 	ce = CrossEntropyWithSoftmax
 
-04/27/2016 15:52:07: Evaluation criterion node(s):
+05/03/2016 15:23:18: Evaluation criterion node(s):
 
-04/27/2016 15:52:07: 	errTop5 = ErrorPrediction
-04/27/2016 15:52:07: 	err = ErrorPrediction
+05/03/2016 15:23:18: 	errTop1 = ErrorPrediction
+05/03/2016 15:23:18: 	err = ErrorPrediction
 
 
 Allocating matrices for forward and/or backward propagation.
 
 Memory Sharing Structure:
 
-(nil): {[err Gradient[1]] [errTop5 Gradient[1]] [featScale Gradient[1 x 1]] [featScaled Gradient[784 x 1 x *]] [features Gradient[784 x *]] [labels Gradient[10 x *]] [unnamed81 Gradient[1 x 1]] }
-0x2a511f8: {[features Value[784 x *]] }
-0x3be1538: {[featScale Value[1 x 1]] }
-0x3be2768: {[labels Value[10 x *]] }
-0x3be3238: {[h1.W Value[200 x 784]] }
-0x3be4148: {[h1.b Value[200 x 1]] }
-0x3be53a8: {[ol.W Value[10 x 200]] }
-0x3be62a8: {[ol.b Value[10 x 1]] }
-0x3be7c28: {[unnamed81 Value[1 x 1]] }
-0x3beb2c8: {[h1.t Gradient[200 x 1 x *]] [h1.y Value[200 x 1 x *]] }
-0x3bec678: {[h1.W Gradient[200 x 784]] [h1.z Value[200 x 1 x *]] }
-0x3becad8: {[featScaled Value[784 x 1 x *]] }
-0x3bece88: {[h1.t Value[200 x 1 x *]] }
-0x3becf88: {[h1.z Gradient[200 x 1 x *]] [ol.t Value[10 x 1 x *]] }
-0x3bed0e8: {[ol.W Gradient[10 x 200]] [ol.z Value[10 x 1 x *]] }
-0x3bed248: {[ce Value[1]] }
-0x3bed668: {[err Value[1]] }
-0x3bedd68: {[errTop5 Value[1]] }
-0x3bee468: {[ce Gradient[1]] }
-0x3bee628: {[h1.b Gradient[200 x 1]] [h1.y Gradient[200 x 1 x *]] [ol.z Gradient[10 x 1 x *]] }
-0x3bee7e8: {[ol.t Gradient[10 x 1 x *]] }
-0x3bee9a8: {[ol.b Gradient[10 x 1]] }
+(nil): {[err Gradient[1]] [errTop1 Gradient[1]] [featScale Gradient[1 x 1]] [featScaled Gradient[784 x 1 x *]] [features Gradient[784 x *]] [labels Gradient[10 x *]] [unnamed81 Gradient[1 x 1]] }
+0x1d08748: {[err Value[1]] }
+0x1d088a8: {[ol.z Value[10 x 1 x *]] }
+0x1d0a5b8: {[features Value[784 x *]] }
+0x2e9d5a8: {[featScale Value[1 x 1]] }
+0x2e9e758: {[labels Value[10 x *]] }
+0x2e9f278: {[h1.W Value[200 x 784]] }
+0x2ea0108: {[h1.b Value[200 x 1]] }
+0x2ea13a8: {[ol.W Value[10 x 200]] }
+0x2ea22a8: {[ol.b Value[10 x 1]] }
+0x2ea2fb8: {[errTop1 Value[1]] }
+0x2ea3cd8: {[unnamed81 Value[1 x 1]] }
+0x2ea7518: {[ce Value[1]] }
+0x2ea7978: {[h1.t Gradient[200 x 1 x *]] [h1.y Value[200 x 1 x *]] }
+0x2ea7ad8: {[h1.z Gradient[200 x 1 x *]] [ol.t Value[10 x 1 x *]] }
+0x2ea8e18: {[h1.W Gradient[200 x 784]] [h1.z Value[200 x 1 x *]] }
+0x2ea9278: {[featScaled Value[784 x 1 x *]] }
+0x2ea9628: {[h1.t Value[200 x 1 x *]] }
+0x2eaa588: {[ce Gradient[1]] }
+0x2eaa748: {[ol.W Gradient[10 x 200]] [ol.z Gradient[10 x 1 x *]] }
+0x2eaa908: {[ol.t Gradient[10 x 1 x *]] }
+0x2eaaac8: {[ol.b Gradient[10 x 1]] }
+0x2eaac88: {[h1.b Gradient[200 x 1]] [h1.y Gradient[200 x 1 x *]] }
 
-04/27/2016 15:52:07: No PreCompute nodes found, skipping PreCompute step.
+05/03/2016 15:23:18: No PreCompute nodes found, skipping PreCompute step.
 
-04/27/2016 15:52:07: Starting Epoch 1: learning rate per sample = 0.003125  effective momentum = 0.000000  momentum as time constant = 0.0 samples
+05/03/2016 15:23:18: Starting Epoch 1: learning rate per sample = 0.003125  effective momentum = 0.000000  momentum as time constant = 0.0 samples
 
-04/27/2016 15:52:07: Starting minibatch loop.
-04/27/2016 15:52:08:  Epoch[ 1 of 3]-Minibatch[   1- 500, 26.67%]: SamplesSeen = 16000; TrainLossPerSample =  1.30072449; EvalErr[0]PerSample = 0.38468750; EvalErr[1]PerSample = 0.38468750; TotalTime = 1.2627s; SamplesPerSecond = 12671.5
-04/27/2016 15:52:09:  Epoch[ 1 of 3]-Minibatch[ 501-1000, 53.33%]: SamplesSeen = 16000; TrainLossPerSample =  0.49017273; EvalErr[0]PerSample = 0.13037500; EvalErr[1]PerSample = 0.13037500; TotalTime = 0.2633s; SamplesPerSecond = 60765.3
-04/27/2016 15:52:09:  Epoch[ 1 of 3]-Minibatch[1001-1500, 80.00%]: SamplesSeen = 16000; TrainLossPerSample =  0.39744922; EvalErr[0]PerSample = 0.11168750; EvalErr[1]PerSample = 0.11168750; TotalTime = 0.2566s; SamplesPerSecond = 62348.3
-04/27/2016 15:52:09: Finished Epoch[ 1 of 3]: [Training Set] TrainLossPerSample = 0.65501042; TotalSamplesSeen = 60000; EvalErrPerSample [0]=0.18685; [1]=0.18685; AvgLearningRatePerSample = 0.003125; EpochTime=2.06087
-04/27/2016 15:52:09: Finished Epoch[ 1 of 3]:     Criterion Node [ce] Per Sample = 0.65501042
-04/27/2016 15:52:09: Finished Epoch[ 1 of 3]:     Evaluation Node [errTop5] Per Sample = 0.18685
-04/27/2016 15:52:09: Finished Epoch[ 1 of 3]:     Evaluation Node [err] Per Sample = 0.18685
-04/27/2016 15:52:09: SGD: Saving checkpoint model '/tmp/cntk-test-20160427155206.337033/CNTKTextFormatReader/Examples/Image/MNIST_01_OneHidden@release_gpu/Models/01_OneHidden.1'
+05/03/2016 15:23:18: Starting minibatch loop.
+05/03/2016 15:23:19:  Epoch[ 1 of 3]-Minibatch[   1- 500, 26.67%]: ce = 1.30072449 * 16000; errTop1 = 0.38468750 * 16000; err = 0.38468750 * 16000; time = 1.1260s; samplesPerSecond = 14209.8
+05/03/2016 15:23:20:  Epoch[ 1 of 3]-Minibatch[ 501-1000, 53.33%]: ce = 0.49017273 * 16000; errTop1 = 0.13037500 * 16000; err = 0.13037500 * 16000; time = 0.2503s; samplesPerSecond = 63925.8
+05/03/2016 15:23:20:  Epoch[ 1 of 3]-Minibatch[1001-1500, 80.00%]: ce = 0.39744922 * 16000; errTop1 = 0.11168750 * 16000; err = 0.11168750 * 16000; time = 0.2492s; samplesPerSecond = 64214.5
+05/03/2016 15:23:20: Finished Epoch[ 1 of 3]: [Training] ce = 0.65501042 * 60000; errTop1 = 0.18685000 * 60000; err = 0.18685000 * 60000; totalSamplesSeen = 60000; learningRatePerSample = 0.003125; epochTime=1.8311s
+05/03/2016 15:23:20: SGD: Saving checkpoint model '/tmp/cntk-test-20160503152234.597575/CNTKTextFormatReader/Examples/Image/MNIST_01_OneHidden@release_gpu/Models/01_OneHidden.1'
 
-04/27/2016 15:52:09: Starting Epoch 2: learning rate per sample = 0.003125  effective momentum = 0.000000  momentum as time constant = 0.0 samples
+05/03/2016 15:23:20: Starting Epoch 2: learning rate per sample = 0.003125  effective momentum = 0.000000  momentum as time constant = 0.0 samples
 
-04/27/2016 15:52:09: Starting minibatch loop.
-04/27/2016 15:52:09:  Epoch[ 2 of 3]-Minibatch[   1- 500, 26.67%]: SamplesSeen = 16000; TrainLossPerSample =  0.32870679; EvalErr[0]PerSample = 0.09531250; EvalErr[1]PerSample = 0.09531250; TotalTime = 0.2660s; SamplesPerSecond = 60144.7
-04/27/2016 15:52:10:  Epoch[ 2 of 3]-Minibatch[ 501-1000, 53.33%]: SamplesSeen = 16000; TrainLossPerSample =  0.31809930; EvalErr[0]PerSample = 0.09206250; EvalErr[1]PerSample = 0.09206250; TotalTime = 0.2614s; SamplesPerSecond = 61197.2
-04/27/2016 15:52:10:  Epoch[ 2 of 3]-Minibatch[1001-1500, 80.00%]: SamplesSeen = 16000; TrainLossPerSample =  0.31002502; EvalErr[0]PerSample = 0.08762500; EvalErr[1]PerSample = 0.08762500; TotalTime = 0.2624s; SamplesPerSecond = 60964.9
-04/27/2016 15:52:10: Finished Epoch[ 2 of 3]: [Training Set] TrainLossPerSample = 0.31494245; TotalSamplesSeen = 120000; EvalErrPerSample [0]=0.0909; [1]=0.0909; AvgLearningRatePerSample = 0.003125; EpochTime=0.997028
-04/27/2016 15:52:10: Finished Epoch[ 2 of 3]:     Criterion Node [ce] Per Sample = 0.31494245
-04/27/2016 15:52:10: Finished Epoch[ 2 of 3]:     Evaluation Node [errTop5] Per Sample = 0.0909
-04/27/2016 15:52:10: Finished Epoch[ 2 of 3]:     Evaluation Node [err] Per Sample = 0.0909
-04/27/2016 15:52:10: SGD: Saving checkpoint model '/tmp/cntk-test-20160427155206.337033/CNTKTextFormatReader/Examples/Image/MNIST_01_OneHidden@release_gpu/Models/01_OneHidden.2'
+05/03/2016 15:23:20: Starting minibatch loop.
+05/03/2016 15:23:20:  Epoch[ 2 of 3]-Minibatch[   1- 500, 26.67%]: ce = 0.32870679 * 16000; errTop1 = 0.09531250 * 16000; err = 0.09531250 * 16000; time = 0.2506s; samplesPerSecond = 63850.6
+05/03/2016 15:23:20:  Epoch[ 2 of 3]-Minibatch[ 501-1000, 53.33%]: ce = 0.31809930 * 16000; errTop1 = 0.09206250 * 16000; err = 0.09206250 * 16000; time = 0.2504s; samplesPerSecond = 63905.4
+05/03/2016 15:23:21:  Epoch[ 2 of 3]-Minibatch[1001-1500, 80.00%]: ce = 0.31002502 * 16000; errTop1 = 0.08762500 * 16000; err = 0.08762500 * 16000; time = 0.2490s; samplesPerSecond = 64259.6
+05/03/2016 15:23:21: Finished Epoch[ 2 of 3]: [Training] ce = 0.31494245 * 60000; errTop1 = 0.09090000 * 60000; err = 0.09090000 * 60000; totalSamplesSeen = 120000; learningRatePerSample = 0.003125; epochTime=0.946565s
+05/03/2016 15:23:21: SGD: Saving checkpoint model '/tmp/cntk-test-20160503152234.597575/CNTKTextFormatReader/Examples/Image/MNIST_01_OneHidden@release_gpu/Models/01_OneHidden.2'
 
-04/27/2016 15:52:10: Starting Epoch 3: learning rate per sample = 0.003125  effective momentum = 0.000000  momentum as time constant = 0.0 samples
+05/03/2016 15:23:21: Starting Epoch 3: learning rate per sample = 0.003125  effective momentum = 0.000000  momentum as time constant = 0.0 samples
 
-04/27/2016 15:52:10: Starting minibatch loop.
-04/27/2016 15:52:10:  Epoch[ 3 of 3]-Minibatch[   1- 500, 26.67%]: SamplesSeen = 16000; TrainLossPerSample =  0.28016867; EvalErr[0]PerSample = 0.08187500; EvalErr[1]PerSample = 0.08187500; TotalTime = 0.2529s; SamplesPerSecond = 63272.1
-04/27/2016 15:52:11:  Epoch[ 3 of 3]-Minibatch[ 501-1000, 53.33%]: SamplesSeen = 16000; TrainLossPerSample =  0.28037985; EvalErr[0]PerSample = 0.08093750; EvalErr[1]PerSample = 0.08093750; TotalTime = 0.2494s; SamplesPerSecond = 64156.8
-04/27/2016 15:52:11:  Epoch[ 3 of 3]-Minibatch[1001-1500, 80.00%]: SamplesSeen = 16000; TrainLossPerSample =  0.27621069; EvalErr[0]PerSample = 0.08237500; EvalErr[1]PerSample = 0.08237500; TotalTime = 0.2492s; SamplesPerSecond = 64199.5
-04/27/2016 15:52:11: Finished Epoch[ 3 of 3]: [Training Set] TrainLossPerSample = 0.27476087; TotalSamplesSeen = 180000; EvalErrPerSample [0]=0.080116667; [1]=0.080116667; AvgLearningRatePerSample = 0.003125; EpochTime=0.947383
-04/27/2016 15:52:11: Finished Epoch[ 3 of 3]:     Criterion Node [ce] Per Sample = 0.27476087
-04/27/2016 15:52:11: Finished Epoch[ 3 of 3]:     Evaluation Node [errTop5] Per Sample = 0.080116667
-04/27/2016 15:52:11: Finished Epoch[ 3 of 3]:     Evaluation Node [err] Per Sample = 0.080116667
-04/27/2016 15:52:11: SGD: Saving checkpoint model '/tmp/cntk-test-20160427155206.337033/CNTKTextFormatReader/Examples/Image/MNIST_01_OneHidden@release_gpu/Models/01_OneHidden'
-04/27/2016 15:52:11: CNTKCommandTrainEnd: train
+05/03/2016 15:23:21: Starting minibatch loop.
+05/03/2016 15:23:21:  Epoch[ 3 of 3]-Minibatch[   1- 500, 26.67%]: ce = 0.28016867 * 16000; errTop1 = 0.08187500 * 16000; err = 0.08187500 * 16000; time = 0.2501s; samplesPerSecond = 63979.0
+05/03/2016 15:23:21:  Epoch[ 3 of 3]-Minibatch[ 501-1000, 53.33%]: ce = 0.28037985 * 16000; errTop1 = 0.08093750 * 16000; err = 0.08093750 * 16000; time = 0.2493s; samplesPerSecond = 64188.2
+05/03/2016 15:23:22:  Epoch[ 3 of 3]-Minibatch[1001-1500, 80.00%]: ce = 0.27621069 * 16000; errTop1 = 0.08237500 * 16000; err = 0.08237500 * 16000; time = 0.2489s; samplesPerSecond = 64278.7
+05/03/2016 15:23:22: Finished Epoch[ 3 of 3]: [Training] ce = 0.27476087 * 60000; errTop1 = 0.08011667 * 60000; err = 0.08011667 * 60000; totalSamplesSeen = 180000; learningRatePerSample = 0.003125; epochTime=0.945081s
+05/03/2016 15:23:22: SGD: Saving checkpoint model '/tmp/cntk-test-20160503152234.597575/CNTKTextFormatReader/Examples/Image/MNIST_01_OneHidden@release_gpu/Models/01_OneHidden'
+05/03/2016 15:23:22: CNTKCommandTrainEnd: train
 
-04/27/2016 15:52:11: Action "train" complete.
+05/03/2016 15:23:22: Action "train" complete.
 
 
-04/27/2016 15:52:11: ##############################################################################
-04/27/2016 15:52:11: #                                                                            #
-04/27/2016 15:52:11: # Action "test"                                                              #
-04/27/2016 15:52:11: #                                                                            #
-04/27/2016 15:52:11: ##############################################################################
+05/03/2016 15:23:22: ##############################################################################
+05/03/2016 15:23:22: #                                                                            #
+05/03/2016 15:23:22: # Action "test"                                                              #
+05/03/2016 15:23:22: #                                                                            #
+05/03/2016 15:23:22: ##############################################################################
 
 
 Post-processing network...
@@ -399,7 +391,7 @@ Post-processing network...
 4 roots:
 	ce = CrossEntropyWithSoftmax()
 	err = ErrorPrediction()
-	errTop5 = ErrorPrediction()
+	errTop1 = ErrorPrediction()
 	ol.z = Plus()
 
 Validating network. 17 nodes to process in pass 1.
@@ -420,7 +412,7 @@ Validating --> ol.z = Plus (ol.t, ol.b) : [10 x 1 x *1], [10 x 1] -> [10 x 1 x *
 Validating --> ce = CrossEntropyWithSoftmax (labels, ol.z) : [10 x *1], [10 x 1 x *1] -> [1]
 Validating --> err = ErrorPrediction (labels, ol.z) : [10 x *1], [10 x 1 x *1] -> [1]
 Validating --> unnamed81 = LearnableParameter() :  -> [1 x 1]
-Validating --> errTop5 = ErrorPrediction (labels, ol.z, unnamed81) : [10 x *1], [10 x 1 x *1], [1 x 1] -> [1]
+Validating --> errTop1 = ErrorPrediction (labels, ol.z, unnamed81) : [10 x *1], [10 x 1 x *1], [1 x 1] -> [1]
 
 Validating network. 9 nodes to process in pass 2.
 
@@ -440,27 +432,27 @@ Allocating matrices for forward and/or backward propagation.
 
 Memory Sharing Structure:
 
-(nil): {[ce Gradient[1]] [err Gradient[1]] [errTop5 Gradient[1]] [featScale Gradient[1 x 1]] [featScaled Gradient[784 x 1 x *1]] [features Gradient[784 x *1]] [h1.W Gradient[200 x 784]] [h1.b Gradient[200 x 1]] [h1.t Gradient[200 x 1 x *1]] [h1.y Gradient[200 x 1 x *1]] [h1.z Gradient[200 x 1 x *1]] [labels Gradient[10 x *1]] [ol.W Gradient[10 x 200]] [ol.b Gradient[10 x 1]] [ol.t Gradient[10 x 1 x *1]] [ol.z Gradient[10 x 1 x *1]] [unnamed81 Gradient[1 x 1]] }
-0x2a511f8: {[h1.W Value[200 x 784]] }
-0x2a528a8: {[labels Value[10 x *1]] }
-0x2a596e8: {[featScale Value[1 x 1]] }
-0x2a5e848: {[h1.b Value[200 x 1]] }
-0x2a655f8: {[features Value[784 x *1]] }
-0x2a82198: {[err Value[1]] }
-0x2a828c8: {[errTop5 Value[1]] }
-0x3be4038: {[ol.b Value[10 x 1]] }
-0x3be6768: {[h1.t Value[200 x 1 x *1]] }
-0x3be6928: {[h1.z Value[200 x 1 x *1]] }
-0x3be6ae8: {[h1.y Value[200 x 1 x *1]] }
-0x3be6ca8: {[ol.t Value[10 x 1 x *1]] }
-0x3be6e68: {[ol.z Value[10 x 1 x *1]] }
-0x3be7028: {[ce Value[1]] }
-0x3be8528: {[ol.W Value[10 x 200]] }
-0x3be8fd8: {[unnamed81 Value[1 x 1]] }
-0x7bcbdb8: {[featScaled Value[784 x 1 x *1]] }
+(nil): {[ce Gradient[1]] [err Gradient[1]] [errTop1 Gradient[1]] [featScale Gradient[1 x 1]] [featScaled Gradient[784 x 1 x *1]] [features Gradient[784 x *1]] [h1.W Gradient[200 x 784]] [h1.b Gradient[200 x 1]] [h1.t Gradient[200 x 1 x *1]] [h1.y Gradient[200 x 1 x *1]] [h1.z Gradient[200 x 1 x *1]] [labels Gradient[10 x *1]] [ol.W Gradient[10 x 200]] [ol.b Gradient[10 x 1]] [ol.t Gradient[10 x 1 x *1]] [ol.z Gradient[10 x 1 x *1]] [unnamed81 Gradient[1 x 1]] }
+0x1d0a5b8: {[features Value[784 x *1]] }
+0x1d0db78: {[errTop1 Value[1]] }
+0x1d0dcd8: {[err Value[1]] }
+0x1d0de38: {[ce Value[1]] }
+0x1d0fd48: {[featScale Value[1 x 1]] }
+0x1d1d8d8: {[labels Value[10 x *1]] }
+0x1d363c8: {[h1.W Value[200 x 784]] }
+0x1d36cb8: {[h1.b Value[200 x 1]] }
+0x1d38558: {[ol.b Value[10 x 1]] }
+0x2ea0048: {[ol.W Value[10 x 200]] }
+0x2ea4fd8: {[featScaled Value[784 x 1 x *1]] }
+0x2ea5388: {[h1.t Value[200 x 1 x *1]] }
+0x2ea5548: {[h1.z Value[200 x 1 x *1]] }
+0x6d1d978: {[unnamed81 Value[1 x 1]] }
+0x6f0e778: {[h1.y Value[200 x 1 x *1]] }
+0x6f0e938: {[ol.t Value[10 x 1 x *1]] }
+0x6f0eaf8: {[ol.z Value[10 x 1 x *1]] }
 
-Final Results: Minibatch[1-625]: SamplesSeen = 10000    errTop5: ErrorPrediction/Sample = 0.0714    err: ErrorPrediction/Sample = 0.0714    ce: CrossEntropyWithSoftmax/Sample = 0.25287636    Perplexity = 1.2877241    
+05/03/2016 15:23:25: Final Results: Minibatch[1-625]: errTop1 = 0.07140000 * 10000; err = 0.07140000 * 10000; ce = 0.25287636 * 10000; perplexity = 1.28772405
 
-04/27/2016 15:52:14: Action "test" complete.
+05/03/2016 15:23:25: Action "test" complete.
 
-04/27/2016 15:52:14: __COMPLETED__
+05/03/2016 15:23:25: __COMPLETED__
