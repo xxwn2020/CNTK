@@ -64,6 +64,9 @@
     <ClInclude Include="TruncatedBpttPacker.h">
       <Filter>Packers</Filter>
     </ClInclude>
+    <ClInclude Include="ChunkCache.h">
+      <Filter>Deserializers</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="NoRandomizer.cpp">
@@ -95,6 +98,9 @@
     </ClCompile>
     <ClCompile Include="TruncatedBpttPacker.cpp">
       <Filter>Packers</Filter>
+    </ClCompile>
+    <ClCompile Include="ChunkCache.cpp">
+      <Filter>Deserializers</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

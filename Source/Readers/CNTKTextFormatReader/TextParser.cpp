@@ -15,12 +15,6 @@
 
 namespace Microsoft { namespace MSR { namespace CNTK {
 
-inline bool isDelimiter(char c)
-{
-    return c == VALUE_DELIMITER || c == NAME_PREFIX || c == COLUMN_DELIMITER ||
-        c == INDEX_DELIMITER || c == ROW_DELIMITER || c == CARRIAGE_RETURN;
-}
-
 enum State
 {
     Init = 0,
@@ -47,10 +41,6 @@ public:
 
     // chunk id (copied from the descriptor)
     size_t m_id;
-    // Keeps track of how many times GetSequence was called.
-    // When this counter value reaches the number of sequences in 
-    // the this chunk, it can be safely unloaded.
-    size_t m_sequenceRequestCount;
 
     // a non-owned pointer to the parser that created this chunk
     TextParser* m_parser;
@@ -70,7 +60,6 @@ TextParser(helper.GetFilePath(), helper.GetStreams())
 {
     SetTraceLevel(helper.GetTraceLevel());
     SetMaxAllowedErrors(helper.GetMaxAllowedErrors());
-    SetChunkCacheSize(helper.GetNumChunksToCache());
     SetChunkSize(helper.GetChunkSize());
     SetSkipSequenceIds(helper.ShouldSkipSequenceIds());
 
@@ -90,7 +79,6 @@ TextParser<ElemType>::TextParser(const std::wstring& filename, const vector<Stre
     m_bufferEnd(nullptr),
     m_pos(nullptr),
     m_chunkSizeBytes(0),
-    m_chunkCacheSize(0),
     m_traceLevel(TraceLevel::Error),
     m_hadWarnings(false),
     m_numAllowedErrors(0),
@@ -153,19 +141,25 @@ void TextParser<ElemType>::Initialize()
 
     attempt(m_numRetries, [this]()
     {
-        m_file = fopenOrDie(m_filename, L"rbS");
-    });
+        if (m_file == nullptr)
+        {
+            m_file = fopenOrDie(m_filename, L"rbS");
+        }
+        else if (ferror(m_file) != 0)
+        {
+            fclose(m_file);
+            m_file = fopenOrDie(m_filename, L"rbS");
+        }
+        
+        if (funicode(m_file))
+        {
+            m_numRetries = 0;
+            RuntimeError("Found a UTF-16 BOM at the beginning of the input file (%ls). "
+                "UTF-16 encoding is currently not supported.", m_filename.c_str());
+        }
 
-    if (funicode(m_file))
-    {
-        RuntimeError("Found a UTF-16 BOM at the beginning of the input file (%ls). "
-            "UTF-16 encoding is currently not supported.", m_filename.c_str());
-    }
+        m_indexer = make_unique<Indexer>(m_file, m_skipSequenceIds, m_chunkSizeBytes);
 
-    m_indexer = make_unique<Indexer>(m_file, m_skipSequenceIds, m_chunkSizeBytes);
-
-    attempt(m_numRetries, [this]()
-    {
         m_indexer->Build();
     });
 
@@ -231,7 +225,6 @@ TextParser<ElemType>::TextDataChunk::TextDataChunk(const ChunkDescriptor& descri
     m_parser(parser)
 {
     m_id = descriptor.m_id;
-    m_sequenceRequestCount = 0;
 }
 
 template <class ElemType>
@@ -239,7 +232,6 @@ void TextParser<ElemType>::TextDataChunk::GetSequence(size_t sequenceId, std::ve
 {
     auto it = m_sequenceMap.find(sequenceId);
     assert(it != m_sequenceMap.end());
-    ++m_sequenceRequestCount;
     result.reserve(m_parser->m_streamInfos.size());
     const auto& sequenceData = it->second;
     for (size_t j = 0; j < m_parser->m_streamInfos.size(); ++j)
@@ -277,50 +269,20 @@ void TextParser<ElemType>::TextDataChunk::GetSequence(size_t sequenceId, std::ve
 template <class ElemType>
 ChunkPtr TextParser<ElemType>::GetChunk(size_t chunkId)
 {
-    ChunkPtr chunk;
-    auto it = m_chunkCache.find(chunkId);
-    if (it != m_chunkCache.end())
+    const auto& chunkDescriptor = m_indexer->GetIndex()[chunkId];
+    auto textChunk = make_shared<TextDataChunk>(chunkDescriptor, this);
+
+    attempt(m_numRetries, [this, &textChunk, &chunkDescriptor]()
     {
-        chunk = it->second;
-    }
-    else
-    {
-        const auto& chunkDescriptor = m_indexer->GetIndex()[chunkId];
-        auto textChunk = make_shared<TextDataChunk>(chunkDescriptor, this);
-
-        attempt(m_numRetries, [this, &textChunk, &chunkDescriptor]()
+        if (ferror(m_file) != 0)
         {
-            LoadChunk(textChunk, chunkDescriptor);
-        });
-
-        if (m_chunkCacheSize > 0 && m_chunkCache.size() == m_chunkCacheSize)
-        {
-            size_t candidateId = SIZE_MAX;
-            size_t minNumSequencesLeft = SIZE_MAX;
-            for (const auto& it : m_chunkCache)
-            {
-                const auto& chunk = *(it.second.get());
-                size_t numSequencesUsed = 0;
-                numSequencesUsed += chunk.m_sequenceRequestCount;
-                size_t numSequencesLeft = chunk.m_sequenceMap.size() - numSequencesUsed;
-                if (numSequencesLeft < minNumSequencesLeft)
-                {
-                    minNumSequencesLeft = numSequencesLeft;
-                    candidateId = it.first;
-                }
-            }
-            assert(candidateId != SIZE_MAX);
-            m_chunkCache.erase(candidateId);
+            fclose(m_file);
+            m_file = fopenOrDie(m_filename, L"rbS");
         }
+        LoadChunk(textChunk, chunkDescriptor);
+    });
 
-        if (m_chunkCacheSize > 0)
-        {
-            m_chunkCache[chunkId] = textChunk;
-        }
-
-        chunk = textChunk;
-    }
-    return chunk;
+    return textChunk;
 }
 
 template <class ElemType>
@@ -465,7 +427,7 @@ typename TextParser<ElemType>::SequenceBuffer TextParser<ElemType>::LoadSequence
     // Double check if there are empty input streams.
     // TODO this handling needs to be graceful, but currently CNTK complains when we return empty sequences.
     bool hasEmptyInputs = false, hasDuplicateInputs = false;
-
+    size_t maxInputLength = 0;
     for (size_t i = 0; i < sequence.size(); ++i)
     {
         if (sequence[i]->m_numberOfSamples == 0)
@@ -488,6 +450,7 @@ typename TextParser<ElemType>::SequenceBuffer TextParser<ElemType>::LoadSequence
                     sequenceDsc.m_id, GetFileInfo().c_str());
             }
         }
+        maxInputLength = max(sequence[i]->m_numberOfSamples, maxInputLength);
     }
 
     if (hasEmptyInputs)
@@ -498,6 +461,17 @@ typename TextParser<ElemType>::SequenceBuffer TextParser<ElemType>::LoadSequence
 
     if (hasDuplicateInputs)
     {
+        IncrementNumberOfErrorsOrDie();
+    }
+    else if (maxInputLength < expectedRowCount)
+    {
+        if (ShouldWarn())
+        {
+            fprintf(stderr,
+                "WARNING: Maximum per-input number of samples for sequence (id = %" PRIu64 ") %ls"
+                " is less than expected (%" PRId64 " vs. %" PRId64 ").\n",
+                sequenceDsc.m_id, GetFileInfo().c_str(), maxInputLength, expectedRowCount);
+        }
         IncrementNumberOfErrorsOrDie();
     }
 
@@ -527,14 +501,6 @@ bool TextParser<ElemType>::TryReadRow(SequenceBuffer& sequence, size_t& bytesToR
     {
         char c = *m_pos;
 
-        if (c == COLUMN_DELIMITER || c == VALUE_DELIMITER || c == CARRIAGE_RETURN)
-        {
-            // skip column and value separators, as well as carriage returns.
-            ++m_pos;
-            --bytesToRead;
-            continue;
-        }
-
         if (c == ROW_DELIMITER)
         {
             // found the end of row, skip the delimiter, return.
@@ -555,6 +521,14 @@ bool TextParser<ElemType>::TryReadRow(SequenceBuffer& sequence, size_t& bytesToR
             }
 
             return numSampleRead > 0;
+        }
+
+        if (isColumnDelimiter(c))
+        {
+            // skip column (input) delimiters.
+            ++m_pos;
+            --bytesToRead;
+            continue;
         }
 
         if (TryReadSample(sequence, bytesToRead))
@@ -684,9 +658,9 @@ bool TextParser<ElemType>::TryGetInputId(size_t& id, size_t& bytesToRead)
     {
         char c = *m_pos;
 
-        // an input id can be followed by a value marker, end of line (also, carriage return),
-        // column separator or the name prefix of the following input.
-        if (c <= VALUE_DELIMITER || c == NAME_PREFIX)
+        // stop as soon as there's a value delimiter, an input prefix
+        // or a non-printable character (e.g., newline, carriage return).
+        if (isValueDelimiter(c) || c == NAME_PREFIX || isNonPrintable(c))
         {
             size_t size = scratchIndex - m_scratch.get();
             if (size)
@@ -757,8 +731,16 @@ bool TextParser<ElemType>::TryReadDenseSample(vector<ElemType>& values, size_t s
     {
         char c = *m_pos;
 
+        if (isValueDelimiter(c))
+        {
+            // skip value delimiters
+            ++m_pos;
+            --bytesToRead;
+            continue;
+        }
+
         // return as soon as we hit a non-printable or a name prefix
-        if (c < VALUE_DELIMITER || c == NAME_PREFIX)
+        if (isNonPrintable(c) || c == NAME_PREFIX)
         {
             if (counter > sampleSize)
             {
@@ -792,14 +774,6 @@ bool TextParser<ElemType>::TryReadDenseSample(vector<ElemType>& values, size_t s
             return true;
         }
 
-        if (c == VALUE_DELIMITER)
-        {
-            // skip value delimiters
-            ++m_pos;
-            --bytesToRead;
-            continue;
-        }
-
         if (!TryReadRealNumber(value, bytesToRead))
         {
             // bail out.
@@ -831,19 +805,19 @@ bool TextParser<ElemType>::TryReadSparseSample(std::vector<ElemType>& values, st
     {
         char c = *m_pos;
 
-        // return as soon as we hit a non-printable or a name prefix
-        if (c < VALUE_DELIMITER || c == NAME_PREFIX)
-        {
-            // empty sparse samples are allowed ("|InputeName_1|InputName2...")
-            return true;
-        }
-
-        if (c == VALUE_DELIMITER)
+        if (isValueDelimiter(c))
         {
             // skip value delimiters
             ++m_pos;
             --bytesToRead;
             continue;
+        }
+
+        // return as soon as we hit a non-printable or a name prefix
+        if (isNonPrintable(c) || c == NAME_PREFIX)
+        {
+            // empty sparse samples are allowed ("|InputeName_1|InputName2...")
+            return true;
         }
 
         // read next sparse index
@@ -912,8 +886,8 @@ void TextParser<ElemType>::SkipToNextValue(size_t& bytesToRead)
     while (bytesToRead && CanRead())
     {
         char c = *m_pos;
-        // skip everything until we hit either a value marker, an input marker or the end of row.
-        if (c == VALUE_DELIMITER || c == ROW_DELIMITER || c == NAME_PREFIX)
+        // skip everything until we hit either a value delimiter, an input marker or the end of row.
+        if (isValueDelimiter(c) || c == NAME_PREFIX || c == ROW_DELIMITER)
         {
             return;
         }
@@ -949,19 +923,7 @@ bool TextParser<ElemType>::TryReadUint64(size_t& value, size_t& bytesToRead)
 
         if (!isdigit(c))
         {
-            if (isDelimiter(c))
-            {
-                return found;
-            }
-            
-            if (ShouldWarn())
-            {
-                fprintf(stderr,
-                    "WARNING: Unexpected character('%c') in a uint64 value %ls.\n",
-                    c, GetFileInfo().c_str());
-            }
-
-            return false;
+            return found;
         }
 
         found |= true;
@@ -1210,12 +1172,6 @@ template <class ElemType>
 void TextParser<ElemType>::SetSkipSequenceIds(bool skip)
 {
     m_skipSequenceIds = skip;
-}
-
-template <class ElemType>
-void TextParser<ElemType>::SetChunkCacheSize(unsigned int size)
-{
-    m_chunkCacheSize = size;
 }
 
 template <class ElemType>
