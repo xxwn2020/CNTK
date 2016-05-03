@@ -9,7 +9,7 @@
 #include "DataReaderHelpers.h"
 #include "MatrixQuantizerImpl.h"
 #ifdef CNTK_PARALLEL_TRAINING_SUPPORT
-static inline bool operator==(const std::pair<double,size_t>& a, double b) { assert(b==0); return a.first == b; }
+//static inline bool operator==(const std::pair<double,size_t>& a, double b) { assert(b==0); return a.first == b; }
 // ^^ workaround until this line in AggregateGradientsImpl() gets updated: assert(headerCPU->evalErrors[i] == 0);
 #include "AllReduceDistGradAggregator.h"
 #include "BlockMomentumSGD.h"
@@ -150,8 +150,6 @@ void SGD<ElemType>::TrainOrAdaptModel(int startEpoch, ComputationNetworkPtr net,
                                       IDataReader* trainSetDataReader,
                                       IDataReader* validationSetDataReader)
 {
-    let& featureNodes = net->FeatureNodes();
-    let& labelNodes = net->LabelNodes();
     let& criterionNodes = GetTrainCriterionNodes(net);
 
     fprintf(stderr, "\n");
@@ -204,6 +202,9 @@ void SGD<ElemType>::TrainOrAdaptModel(int startEpoch, ComputationNetworkPtr net,
     // TODO: instead, remember the nodes directly, to be able to handle both float and double nodes; current version will crash for mixed networks
     StreamMinibatchInputs* inputMatrices = new StreamMinibatchInputs();
     // TODO: ^^ change to shared_ptr or unique_ptr
+    let& featureNodes = net->FeatureNodes();
+    let& labelNodes = net->LabelNodes();
+    // BUGBUG: ^^ should not get all feature/label nodes, but only the ones referenced in a criterion
     for (size_t pass = 0; pass < 2; pass++)
     {
         auto& nodes = (pass == 0) ? featureNodes : labelNodes;
@@ -482,42 +483,24 @@ void SGD<ElemType>::TrainOrAdaptModel(int startEpoch, ComputationNetworkPtr net,
         else
             lrControlCriterion = epochCriterion.Average();
 
-        // note: TrainLossPerSample is for this epoch, while TotalSamplesSeen is the total over all epochs.
-        LOGPRINTF(stderr,
-                  "Finished Epoch[%2d of %d]: [Training Set] TrainLossPerSample = %.8g; TotalSamplesSeen = %d; ",
-                  i + 1, (int)m_maxEpochs, epochCriterion.Average(), (int)totalTrainingSamplesSeen);
+        LOGPRINTF(stderr, "Finished Epoch[%2d of %d]: [Training] ", i + 1, (int)m_maxEpochs);
+        epochCriterion.LogCriterion(criterionNodes[0]->NodeName());
+
         m_lastFinishedEpochTrainLoss = epochCriterion.Average();
-        if (epochEvalErrors.size() == 0) // no eval criterion, only train criterion itself
-        {
-            fprintf(stderr,
-                    "AvgLearningRatePerSample = %.8g; EpochTime=%.6g\n",
-                    learnRatePerSample, epochTime);
-        }
-        else if (epochEvalErrors.size() == 1)
-        {
-            fprintf(stderr,
-                    "EvalErrPerSample = %.8g; AvgLearningRatePerSample = %.8g; EpochTime=%.6g\n",
-                    epochEvalErrors[0].Average(), learnRatePerSample, epochTime);
-        }
-        else
-        {
-            fprintf(stderr, "EvalErrPerSample ");
-            for (size_t j = 0; j < epochEvalErrors.size(); j++)
-                fprintf(stderr, "[%lu]=%.8g; ", j, epochEvalErrors[j].Average());
+        for (size_t j = 0; j < epochEvalErrors.size(); j++)
+            epochEvalErrors[j].LogCriterion(evaluationNodes[j]->NodeName());
+        fprintf(stderr, "totalSamplesSeen = %d; learningRatePerSample = %.8g; epochTime=%.6gs\n", (int)totalTrainingSamplesSeen, learnRatePerSample, epochTime);
+#if 0
+        // TODO: This was only printed if >1 eval criterion. Why? Needed?
+        LOGPRINTF(stderr, "Finished Epoch[%2d of %d]:     Criterion Node [%ls] Per Sample = %.8g\n",
+            i + 1, (int)m_maxEpochs, criterionNodes[0]->NodeName().c_str(), epochCriterion.Average());
 
-            fprintf(stderr, "AvgLearningRatePerSample = %.8g; EpochTime=%.6g\n",
-                    learnRatePerSample, epochTime);
-
-            // TODO: why these extra log messages here and not for 1 eval criterion?
-            LOGPRINTF(stderr, "Finished Epoch[%2d of %d]:     Criterion Node [%ls] Per Sample = %.8g\n",
-                      i + 1, (int)m_maxEpochs, criterionNodes[0]->NodeName().c_str(), epochCriterion.Average());
-
-            for (size_t j = 0; j < epochEvalErrors.size(); j++)
-            {
-                LOGPRINTF(stderr, "Finished Epoch[%2d of %d]:     Evaluation Node [%ls] Per Sample = %.8g\n",
-                          i + 1, (int) m_maxEpochs, evalNodeNames[j].c_str(), epochEvalErrors[j].Average());
-            }
+        for (size_t j = 0; j < epochEvalErrors.size(); j++)
+        {
+            LOGPRINTF(stderr, "Finished Epoch[%2d of %d]:     Evaluation Node [%ls] Per Sample = %.8g\n",
+                i + 1, (int) m_maxEpochs, evalNodeNames[j].c_str(), epochEvalErrors[j].Average());
         }
+#endif
 
         if (validationSetDataReader != trainSetDataReader && validationSetDataReader != nullptr)
         {
@@ -527,22 +510,23 @@ void SGD<ElemType>::TrainOrAdaptModel(int startEpoch, ComputationNetworkPtr net,
             {
                 cvSetTrainAndEvalNodes.push_back(criterionNodes[0]->NodeName());
             }
-            if (evaluationNodes.size() > 0)
+            for (let node : evaluationNodes)
             {
-                cvSetTrainAndEvalNodes.push_back(evaluationNodes[0]->NodeName());
+                cvSetTrainAndEvalNodes.push_back(node->NodeName());
             }
 
             // BUGBUG: We should not use the training MB size. The training MB size is constrained by both convergence and memory. Eval is only constrained by memory.
             let vScore = evalforvalidation.Evaluate(validationSetDataReader, cvSetTrainAndEvalNodes, m_mbSize[i]);
-            LOGPRINTF(stderr, "Finished Epoch[%2d of %d]: [Validation Set] TrainLossPerSample = %.8g", i + 1, (int)m_maxEpochs, vScore[0].Average());
-            if (vScore.size() > 1)
-                fprintf(stderr, "; EvalErrPerSample = %.8g", vScore[1].Average());
+            LOGPRINTF(stderr, "Finished Epoch[%2d of %d]: [Validate] ", i + 1, (int)m_maxEpochs);
+            for (size_t k = 0; k < vScore.size() /*&& k < 2*/; k++)
+                vScore[k].LogCriterion(cvSetTrainAndEvalNodes[k], /*addSemicolon=*/k + 1 < vScore.size());
+                //fprintf(stderr, "%s %ls = %.8f * %d", k ? ";" : "", cvSetTrainAndEvalNodes[k].c_str(), vScore[k].Average(), (int)vScore[k].second);
             fprintf(stderr, "\n");
 
             if (m_useCVSetControlLRIfCVExists)
             {
                 if (m_useEvalCriterionControlLR && vScore.size() > 1)
-                    lrControlCriterion = vScore[1].Average();
+                    lrControlCriterion = vScore[1].Average(); // use the first of possibly multiple eval criteria
                 else
                     lrControlCriterion = vScore[0].Average(); // the first one is the training criterion
             }
@@ -724,8 +708,6 @@ void SGD<ElemType>::TrainOrAdaptModel(int startEpoch, ComputationNetworkPtr net,
 // -----------------------------------------------------------------------
 // TrainOneEpoch() -- train one epoch
 // -----------------------------------------------------------------------
-
-static string GeneratePaddedFloatOrExpFormat(int padSize, int precision, double value);
 
 template <class ElemType>
 size_t SGD<ElemType>::TrainOneEpoch(ComputationNetworkPtr net,
@@ -1091,57 +1073,46 @@ size_t SGD<ElemType>::TrainOneEpoch(ComputationNetworkPtr net,
             }
 
             // epochCriterion aggregates over entire epoch, but we only show difference to last time we logged
-            // BUGBUG: How does this work if useGradientAggregation? epochCriterion has not been set.
-            //double trainLossSinceLastLogged = (trainSamplesSinceLastLogged != 0) ? ((epochCriterion - epochCriterionLastLogged) / trainSamplesSinceLastLogged) : 0.0;
             EpochCriterion epochCriterionSinceLastLogged = epochCriterion - epochCriterionLastLogged;
-            double trainLossSinceLastLogged =       epochCriterionSinceLastLogged.Average(); // TODO: Check whether old trainSamplesSinceLastLogged matches this ^^ difference
-            int trainSamplesSinceLastLogged = (int) epochCriterionSinceLastLogged.second;
+            let trainLossSinceLastLogged    =      epochCriterionSinceLastLogged.Average(); // TODO: Check whether old trainSamplesSinceLastLogged matches this ^^ difference
+            let trainSamplesSinceLastLogged = (int)epochCriterionSinceLastLogged.second;
 
-            bool wasProgressPrinted = false;
-
-            // log training criterion
-            if (epochNumber > 0 || (int) epochSize > 0)
+            // determine progress in percent
+            int mbProgNumPrecision = 2;
+            double mbProg = 0.0;
+            if (epochNumber > 0 || (int)epochSize > 0) // TODO: explain this condition in a comment
             {
-                // progress tracing for compute cluster management
-                double mbProg = 0.0;
-                int mbProgNumPrecision = 2;
                 if (m_maxComputedEpochSize != 0)
                 {
-                    double numMBPerEpoch = (double) m_maxComputedEpochSize / (double) tunedMBSize;
-                    mbProg = (double) numMBsRun / numMBPerEpoch;
-                    mbProgNumPrecision = (int) ceil(log10(numMBPerEpoch / (double) m_numMBsToShowResult));
+                    double numMBPerEpoch = (double)m_maxComputedEpochSize / (double)tunedMBSize;
+                    mbProg = (double)numMBsRun / numMBPerEpoch;
+                    mbProgNumPrecision = (int)ceil(log10(numMBPerEpoch / (double)m_numMBsToShowResult));
                     mbProgNumPrecision = max(mbProgNumPrecision - 2, 2);
                 }
-                wasProgressPrinted = ProgressTracing::TraceProgressPercentage(epochNumber, mbProg, false);
-
-                // progress tracing for regular log
-                string formatString = "%s Epoch[%2d of %d]-Minibatch[%4d-%4d, %2." + std::to_string(mbProgNumPrecision) + "f%%]: SamplesSeen = %d; TrainLossPerSample = " +
-                                      GeneratePaddedFloatOrExpFormat(11, 8, trainLossSinceLastLogged) + "; ";
-                SGDTrace(stderr, true, formatString.c_str(),
-                         prefixMsg.c_str(), epochNumber + 1, m_maxEpochs, numMBsRun - m_numMBsToShowResult + 1,
-                         numMBsRun, mbProg * 100, trainSamplesSinceLastLogged, trainLossSinceLastLogged);
             }
-            else // if not configured to be able to print a percentage then do this instead:
-            {
-                wasProgressPrinted = ProgressTracing::TraceProgressPercentage(epochNumber, 0.0, false);
-
-                string formatString = "%s Epoch[%2d of %d]-Minibatch[%4d-%4d]: SamplesSeen = %d; TrainLossPerSample = " +
-                                      GeneratePaddedFloatOrExpFormat(11, 8, trainLossSinceLastLogged) + "; ";
-                SGDTrace(stderr, true, formatString.c_str(),
-                         prefixMsg.c_str(), epochNumber + 1, m_maxEpochs, numMBsRun - m_numMBsToShowResult + 1,
-                         numMBsRun, trainSamplesSinceLastLogged, trainLossSinceLastLogged);
+            else // TODO: What's the meaning of this? Some sort of extrapolation?
                 m_maxComputedEpochSize = numMBsRun * trainSamplesSinceLastLogged / m_numMBsToShowResult;
-            }
 
-            for (size_t i = 0; i < epochEvalErrors.size(); i++)
+            // progress tracing for compute cluster management
+            let wasProgressPrinted = ProgressTracing::TraceProgressPercentage(epochNumber, mbProg, false);
+
+            // progress tracing for regular log
+            if (m_traceLevel > 0)
             {
-                double evalError = (epochEvalErrors[i] - epochEvalErrorsLastLogged[i]).Average(); // / trainSamplesSinceLastLogged;
-                string formatString = "EvalErr[%lu]PerSample = " + GeneratePaddedFloatOrExpFormat(0, 8, evalError) + "; ";
-                SGDTrace(stderr, false, formatString.c_str(), i, evalError);
-            }
+                PREPENDTS(stderr);
+                fprintf(stderr, "%s Epoch[%2d of %d]-Minibatch[%4d-%4d",
+                        prefixMsg.c_str(), epochNumber + 1, (int)m_maxEpochs,
+                        (int)(numMBsRun - m_numMBsToShowResult + 1), numMBsRun);
+                if (epochNumber > 0 || (int)epochSize > 0) // got anything?  --TODO: why cast epochSize to (int) for this comparison?
+                    fprintf(stderr, (", %2." + to_string(mbProgNumPrecision) + "f%%").c_str(), mbProg * 100); // --TODO: use a * format?
+                fprintf(stderr, "]: ");
+                epochCriterionSinceLastLogged.LogCriterion(criterionNodes[0]->NodeName());
+                for (size_t i = 0; i < epochEvalErrors.size(); i++)
+                    (epochEvalErrors[i] - epochEvalErrorsLastLogged[i]).LogCriterion(evaluationNodes[i]->NodeName());
 
-            string formatString = "TotalTime = " + GeneratePaddedFloatOrExpFormat(0, 4, totalTimeInMBs) + "s; SamplesPerSecond = %.1f\n";
-            SGDTrace(stderr, false, formatString.c_str(), totalTimeInMBs, trainSamplesSinceLastLogged / totalTimeInMBs);
+                fprintf(stderr, ("time = " + GeneratePaddedFloatOrExpFormat(0, 4, totalTimeInMBs) + "s; samplesPerSecond = %.1f\n").c_str(),
+                        totalTimeInMBs, trainSamplesSinceLastLogged / totalTimeInMBs);
+            }
 
             // progress tracing for compute cluster management
             if (wasProgressPrinted)
@@ -1299,7 +1270,7 @@ bool SGD<ElemType>::PreCompute(ComputationNetworkPtr net,
 
     // trainSetDataReader->StartMinibatchLoop(m_mbSize[0],  0 , requestDataSize);
     // trainSetDataReader->StartMinibatchLoop(m_mbSize[0],  0 , m_epochSize); // only based on one epoch
-    // [1/12/2015 erw] to support large dataset, we usually partition whole dataset into several epoch's,
+    // To support large dataset, we usually partition whole dataset into several epoch's,
     // so we need to use all the data to do precomputing
     if (m_useAllDataForPreComputedNode) // using all the data
         trainSetDataReader->StartMinibatchLoop(m_mbSize[0], 0);
@@ -1642,8 +1613,8 @@ size_t SGD<ElemType>::SearchForBestMinibatchSize(ComputationNetworkPtr net,
         trialMinibatchSize = RoundToMultipleOf64(trialMinibatchSizeFloat);
 
         fprintf(stderr, "\n");
-        LOGPRINTF(stderr, "AdaptiveMinibatchSearch: Evaluating trial minibatchSize=%zd out of range %zd..%zd ...\n\n",
-                  trialMinibatchSize, RoundToMultipleOf64(minMinibatchSize), RoundToMultipleOf64(maxMinibatchSize));
+        LOGPRINTF(stderr, "AdaptiveMinibatchSearch: Evaluating trial minibatchSize=%d out of range %d..%d ...\n\n",
+                  (int)trialMinibatchSize, (int)RoundToMultipleOf64(minMinibatchSize), (int)RoundToMultipleOf64(maxMinibatchSize));
 
         std::vector<EpochCriterion> epochEvalErrors(evaluationNodes.size(), EpochCriterion::Infinity());
         EpochCriterion epochCriterion(EpochCriterion::Infinity());
@@ -1668,7 +1639,7 @@ size_t SGD<ElemType>::SearchForBestMinibatchSize(ComputationNetworkPtr net,
             lastTriedTrialEpochCriterion = baseCriterion;
             isFirstIteration = false;
 
-            LOGPRINTF(stderr, "AdaptiveMinibatchSearch: Computed BaseCriterion %.10g\n", baseCriterion.Average());
+            LOGPRINTF(stderr, "AdaptiveMinibatchSearch: Computed baseCriterion %.8f\n", baseCriterion.Average());
         }
         else if (!epochCriterion.IsNan() &&
                  epochCriterion.Average() > (baseCriterion.Average() * (1.0 + (m_minibatchSearchCriterionErrorMargin / 100.0))))
@@ -1685,12 +1656,12 @@ size_t SGD<ElemType>::SearchForBestMinibatchSize(ComputationNetworkPtr net,
             lastTriedTrialEpochCriterion = epochCriterion;
             if (trialMinibatchSizeFloat * minibatchSizeTuningFactor <= maxMinibatchSize)
             {
-                LOGPRINTF(stderr, "AdaptiveMinibatchSearch: Keep searching... EpochCriterion = %.10g vs BaseCriterion = %.10g\n",
+                LOGPRINTF(stderr, "AdaptiveMinibatchSearch: Keep searching... epochCriterion = %.8f vs bBaseCriterion = %.8f\n",
                           epochCriterion.Average(), baseCriterion.Average());
             }
         }
     }
-    LOGPRINTF(stderr, "AdaptiveMinibatchSearch: Search successful. New minibatchSize is %d. EpochCriterion = %.10g vs BaseCriterion = %.10g\n\n",
+    LOGPRINTF(stderr, "AdaptiveMinibatchSearch: Search successful. New minibatchSize is %d. epochCriterion = %.8f vs baseCriterion = %.8f\n\n",
               (int) lastTriedTrialMinibatchSize, lastTriedTrialEpochCriterion.Average(), baseCriterion.Average());
 
     return lastTriedTrialMinibatchSize;
@@ -1722,17 +1693,11 @@ void SGD<ElemType>::TrainOneMiniEpochAndReloadModel(ComputationNetworkPtr net,
                   /*out*/ epochCriterion, /*out*/ epochEvalErrors,
                   prefixMsg);
 
-    LOGPRINTF(stderr, "Finished Mini-Epoch For LearnRate Selection: TrainLossPerSample = %.8g;", epochCriterion.Average());
-
-    if (epochEvalErrors.size() == 1)
-        LOGPRINTF(stderr, "EvalErrPerSample = %.8g; AvgLearningRatePerSample = %.8g\n", epochEvalErrors[0].Average(), learnRatePerSample);
-    else
-    {
-        LOGPRINTF(stderr, "EvalErrPerSample ");
-        for (size_t i = 0; i < epochEvalErrors.size(); i++)
-            LOGPRINTF(stderr, "[%lu] = %.8g; ", i, epochEvalErrors[i].Average());
-        LOGPRINTF(stderr, "AvgLearningRatePerSample = %.8g\n", learnRatePerSample);
-    }
+    LOGPRINTF(stderr, "Finished Mini-Epoch For LearnRate Selection: ");
+    epochCriterion.LogCriterion(criterionNodes[0]->NodeName());
+    for (size_t j = 0; j < epochEvalErrors.size(); j++)
+        epochEvalErrors[j].LogCriterion(evaluationNodes[j]->NodeName());
+    fprintf(stderr, "learningRatePerSample = %.8g\n", learnRatePerSample);
 
     // go back to where we came from
     int baseModelEpoch = epochNumber - 1;
@@ -1780,46 +1745,6 @@ void SGD<ElemType>::AttemptUtteranceDerivativeFeatures(ComputationNetworkPtr net
                                          dynamic_pointer_cast<ComputationNode<ElemType>>(outputNodes[0])->Value(),
                                          pMBLayout);
     }
-}
-
-// helper for pretty printing
-static string GeneratePaddedFloatOrExpFormat(int padSize, int precision, double value)
-{
-    char format[16];
-    char buffer[512];
-
-    sprintf(format, "%%.%dg", precision);
-    sprintf(buffer, format, value);
-
-    for (int i = 0; i < strlen(buffer); i++)
-    {
-        if (buffer[i] == 'e' || buffer[i] == 'E')
-        {
-            sprintf(format, "%%%d.%de", padSize, precision);
-            return format;
-        }
-    }
-    sprintf(format, "%%%d.%df", padSize, precision);
-    return format;
-}
-
-template <class ElemType>
-int SGD<ElemType>::SGDTrace(FILE* __restrict __stream, bool isPrependTimestamp, const char* __restrict __format, ...)
-{
-    int result = 0;
-    if (m_traceLevel > 0)
-    {
-        va_list args;
-        va_start(args, __format);
-        if (isPrependTimestamp)
-        {
-            PREPENDTS(__stream);
-        }
-
-        result = vfprintf(__stream, __format, args);
-        va_end(args);
-    }
-    return result;
 }
 
 template <class ElemType>
