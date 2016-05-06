@@ -146,11 +146,9 @@ ComputationNetwork::PARTraversalFlowControlNode::PARTraversalFlowControlNode(con
 {
 	// naive
 	unordered_map<ComputationNodeBasePtr, int> dependency;
-	if (m_forwardMethod == ForwardMethod::FORWARD_SAVE_KEYNODE) {
-		for (auto& node : m_nestedNodes)
-		{
-			if (node->IsOutOfDateWrtInputs())
-			{
+	for (auto& node : m_nestedNodes)
+	{
+		if (m_forwardMethod == ForwardMethod::FORWARD_SAVE_KEYNODE) {
 				int numInputs = node->GetNumInputs();
 				for (int index = 0; index < numInputs; index++) {
 					auto& input = node->GetInputs()[index];
@@ -161,7 +159,9 @@ ComputationNetwork::PARTraversalFlowControlNode::PARTraversalFlowControlNode(con
 						dependency[input]++;
 					}
 				}
-			}
+		}
+		else if (m_forwardMethod == ForwardMethod::FORWARD_PARTIAL) {
+			if (node->GetName() == m_section.first) node->BumpEvalTimeStamp();
 		}
 	}
 
@@ -173,13 +173,14 @@ ComputationNetwork::PARTraversalFlowControlNode::PARTraversalFlowControlNode(con
         if (dynamic_pointer_cast<LearnableParameter<float>>(node))
             dynamic_pointer_cast<ComputationNode<float>>(node)->DebugLogMinibatch();
 #endif
+		if (m_forwardMethod == ForwardMethod::FORWARD_PARTIAL) {
+			if (m_section.first == L"") continue;
+			if (node->GetName() == m_section.first) { partialStartMark++; continue; }
+			if (node->GetName() == m_section.second) partialStartMark--;
+			if (!partialStartMark) continue;
+		}
         if (node->IsOutOfDateWrtInputs())
         {
-			if (m_forwardMethod == ForwardMethod::FORWARD_PARTIAL) {
-				if (node->GetName() == m_section.first) partialStartMark++;
-				if (node->GetName() == m_section.second) partialStartMark--;
-				if (!partialStartMark) continue;
-			}
             node->BeginForwardProp();
             node->ForwardProp(fr.WithLayout(node->GetMBLayout()));
             node->EndForwardProp();
@@ -191,10 +192,7 @@ ComputationNetwork::PARTraversalFlowControlNode::PARTraversalFlowControlNode(con
 				if (dependency.find(input) != dependency.end()) {
 					dependency[input]--;
 					if (dependency[input] || !input->IsValueSharable()) continue;
-					if (m_recordNodes.find(input->GetName()) != m_recordNodes.end()) {
-						input->BumpEvalTimeStamp();
-						continue;
-					}
+					if (m_recordNodes.find(input->GetName()) != m_recordNodes.end()) continue;
 					input->ReleaseFunctionValueSize();
 				}
 			}
@@ -209,8 +207,8 @@ ComputationNetwork::PARTraversalFlowControlNode::PARTraversalFlowControlNode(con
     childrenInThisLoop, childrenInOuterLoop; // TODO: think through what these mean when coming from PAR mode
     // process nodes in pre-determined order
 
-	m_section.first = wstring(L"rn3_36.y");
-	m_section.second = wstring(L"");
+	m_shadowNetwork->m_section.first = wstring(L"rn3_36.y");
+	m_shadowNetwork->m_section.second = wstring(L"");
 	m_shadowNetwork->m_forwardMethod = ComputationNodeBase::ForwardMethod::FORWARD_PARTIAL;
 	m_shadowNetwork->ForwardProp(fr);
 
@@ -221,8 +219,8 @@ ComputationNetwork::PARTraversalFlowControlNode::PARTraversalFlowControlNode(con
 
 		if (m_recordNodes.find(node->GetName()) != m_recordNodes.end()) {
 			auto res = m_recordNodes.find(node->GetName());
-			m_section.first = res->second;
-			m_section.second = res->first;
+			m_shadowNetwork->m_section.first = res->second;
+			m_shadowNetwork->m_section.second = res->first;
 			m_shadowNetwork->m_forwardMethod = ComputationNodeBase::ForwardMethod::FORWARD_PARTIAL;
 			m_shadowNetwork->ForwardProp(fr);
 		}

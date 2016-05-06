@@ -282,6 +282,7 @@ public:
 		FORWARD_PARTIAL
 	};
 	ForwardMethod m_forwardMethod;
+	pair<wstring, wstring> m_section;
 
     typedef shared_ptr<ComputationNodeBase> ComputationNodeBasePtr;
 
@@ -1853,7 +1854,6 @@ public:
 protected: public:                                     // needed in ComputationNetwork::FindInRecurrentLoops(), which really should be part of SEQTraversalFlowControlNode
     std::vector<ComputationNodeBasePtr> m_nestedNodes; // nodes tucked away in this node, in evaluation order
 	std::unordered_map<wstring, wstring> m_recordNodes;
-	std::pair<wstring, wstring> m_section;
 	ComputationNodeBasePtr m_shadowNetwork;
 };
 
