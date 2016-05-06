@@ -1395,6 +1395,10 @@ public:
     virtual void /*IComputationNode::*/ EndBackprop() override
     {
         Base::EndBackprop();
+		if (IsValueSharable()) {
+			Value().Resize(1, 1, 0, false);
+			Gradient().Resize(1, 1, 0, false);
+		}
 #ifdef TRACK_GAP_NANS
         for (size_t i = 0; i < m_inputs.size(); i++)
         {
