@@ -138,7 +138,7 @@ public:
     template <class NODESET> // version that takes multiple nodes
     void ForwardProp(const NODESET& nodes)
     {
-        for (auto& node : nodes)
+		for (auto& node : nodes)
             ForwardProp(node);
     }
 
@@ -926,6 +926,8 @@ protected:
     {
         typedef FlowControlNode Base;
         using Base::m_nestedNodes;
+		using Base::m_forwardMethod;
+		using Base::m_recordNodes;
 
     public:
         virtual const std::wstring OperationName() const override
@@ -1031,6 +1033,9 @@ private:
     // pool for matrices that can be shared across nodes
     // TODO: does this apply to anything else besides temporary node-internal intermediate results? What, for example?
     MatrixPool m_matrixPool;
+
+public:
+	ComputationNodeBasePtr m_recordForwardRoot;
 };
 typedef ComputationNetwork::ComputationNetworkPtr ComputationNetworkPtr;
 

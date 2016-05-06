@@ -39,6 +39,13 @@ void ComputationNetwork::ForwardProp(const ComputationNodeBasePtr rootNode)
 {
     VerifyIsCompiled("ForwardProp");
 
+	if (rootNode->GetName() == L"Err") {
+		m_recordForwardRoot = rootNode;
+		GetNestedNetwork(rootNode)->m_forwardMethod = ComputationNodeBase::ForwardMethod::FORWARD_SAVE_KEYNODE;
+	}
+	else {
+		GetNestedNetwork(rootNode)->m_forwardMethod = ComputationNodeBase::ForwardMethod::FORWARD_SAVE_ALL;
+	}
     // traverse all nodes in the pre-determined evaluation order
     GetNestedNetwork(rootNode)->ForwardProp(FrameRange(nullptr));
 }
@@ -76,6 +83,7 @@ void ComputationNetwork::Backprop(const ComputationNodeBasePtr rootNode) // trai
     ZeroInputGradients(rootNode);
 
     // backpropagate through the network
+	GetNestedNetwork(rootNode)->SetShadowNetwork(GetNestedNetwork(m_recordForwardRoot));
     GetNestedNetwork(rootNode)->Backprop(FrameRange(nullptr), true, true);
 }
 
@@ -128,9 +136,37 @@ ComputationNetwork::PARTraversalFlowControlNode::PARTraversalFlowControlNode(con
             nodeIter++; // and consume this node
         }
     }
+
+	m_recordNodes.insert(pair<wstring, wstring>(L"conv1.c.c.c", L""));
+	m_recordNodes.insert(pair<wstring, wstring>(L"rn1_36.y", L"conv1.c.c.c"));
+	m_recordNodes.insert(pair<wstring, wstring>(L"rn2_36.y", L"rn1_36.y"));
+	m_recordNodes.insert(pair<wstring, wstring>(L"rn3_36.y", L"rn2_36.y"));
 }
 /*virtual*/ void ComputationNetwork::PARTraversalFlowControlNode::ForwardProp(const FrameRange& fr) /*override*/
 {
+	// naive
+	unordered_map<ComputationNodeBasePtr, int> dependency;
+	if (m_forwardMethod == ForwardMethod::FORWARD_SAVE_KEYNODE) {
+		for (auto& node : m_nestedNodes)
+		{
+			if (node->IsOutOfDateWrtInputs())
+			{
+				int numInputs = node->GetNumInputs();
+				for (int index = 0; index < numInputs; index++) {
+					auto& input = node->GetInputs()[index];
+					if (dependency.find(input) == dependency.end()) {
+						dependency[input] = 1;
+					}
+					else {
+						dependency[input]++;
+					}
+				}
+			}
+		}
+	}
+
+	int partialStartMark = 0;
+
     for (auto& node : m_nestedNodes)
     {
 #if 0
@@ -139,9 +175,29 @@ ComputationNetwork::PARTraversalFlowControlNode::PARTraversalFlowControlNode(con
 #endif
         if (node->IsOutOfDateWrtInputs())
         {
+			if (m_forwardMethod == ForwardMethod::FORWARD_PARTIAL) {
+				if (node->GetName() == m_section.first) partialStartMark++;
+				if (node->GetName() == m_section.second) partialStartMark--;
+				if (!partialStartMark) continue;
+			}
             node->BeginForwardProp();
             node->ForwardProp(fr.WithLayout(node->GetMBLayout()));
             node->EndForwardProp();
+
+			// naive
+			int numInputs = node->GetNumInputs();
+			for (int index = 0; index < numInputs; index++) {
+				auto& input = node->GetInputs()[index];
+				if (dependency.find(input) != dependency.end()) {
+					dependency[input]--;
+					if (dependency[input] || !input->IsValueSharable()) continue;
+					if (m_recordNodes.find(input->GetName()) != m_recordNodes.end()) {
+						input->BumpEvalTimeStamp();
+						continue;
+					}
+					input->ReleaseFunctionValueSize();
+				}
+			}
 
             node->BumpEvalTimeStamp();
         }
@@ -152,9 +208,24 @@ ComputationNetwork::PARTraversalFlowControlNode::PARTraversalFlowControlNode(con
 {
     childrenInThisLoop, childrenInOuterLoop; // TODO: think through what these mean when coming from PAR mode
     // process nodes in pre-determined order
+
+	m_section.first = wstring(L"rn3_36.y");
+	m_section.second = wstring(L"");
+	m_shadowNetwork->m_forwardMethod = ComputationNodeBase::ForwardMethod::FORWARD_PARTIAL;
+	m_shadowNetwork->ForwardProp(fr);
+
     for (auto pnode = m_nestedNodes.rbegin(); pnode != m_nestedNodes.rend(); pnode++) // iterate backwards over evaluation order
-    {
+	{
+
         auto& node = *pnode;
+
+		if (m_recordNodes.find(node->GetName()) != m_recordNodes.end()) {
+			auto res = m_recordNodes.find(node->GetName());
+			m_section.first = res->second;
+			m_section.second = res->first;
+			m_shadowNetwork->m_forwardMethod = ComputationNodeBase::ForwardMethod::FORWARD_PARTIAL;
+			m_shadowNetwork->ForwardProp(fr);
+		}
 
         node->BeginBackprop();
         node->Backprop(fr.WithLayout(node->GetMBLayout()), true /*childrenInThisLoop*/, true /*childrenInOuterLoop*/);

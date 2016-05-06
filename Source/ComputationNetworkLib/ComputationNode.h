@@ -14,6 +14,7 @@
 #include "ComputationEnvironment.h"
 
 #include <unordered_set>
+#include <unordered_map>
 #include <map>
 #include <string>
 #include <vector>
@@ -75,6 +76,7 @@ struct /*interface*/ IComputationNode
 #define OperationNameOf(T) (T<float>::TypeName()) // convenience macro
 
     virtual void UpdateFunctionMBSize() = 0; // recalculate our column dimensions from MBLayout. Override to update temps.
+	virtual void ReleaseFunctionValueSize() = 0;
 
     virtual void BeginForwardProp() = 0;             // called beforefirst iteration step of ForwardProp()
     virtual void ForwardProp(const FrameRange&) = 0; // forward prop for one minibatch
@@ -273,6 +275,14 @@ class ComputationNodeBase : public IComputationNode,
 {
     // note: enable_shared_from_this<> allows to create a shared_ptr from a raw pointer to this that is correctly aware of all other shared_ptrs (same ref count)
 public:
+	enum ForwardMethod
+	{
+		FORWARD_SAVE_ALL,
+		FORWARD_SAVE_KEYNODE,
+		FORWARD_PARTIAL
+	};
+	ForwardMethod m_forwardMethod;
+
     typedef shared_ptr<ComputationNodeBase> ComputationNodeBasePtr;
 
     // -----------------------------------------------------------------------
@@ -706,6 +716,8 @@ public:
         for (size_t i = 0; i < m_inputs.size(); i++)
             Input(i)->m_gradientInitialized = false;
     }
+
+	virtual void SetShadowNetwork(const ComputationNodeBasePtr&) {};
 
     // -----------------------------------------------------------------------
     // masking
@@ -1323,6 +1335,11 @@ public:
         Value().CollapseDataLocation(); // actually before writing, should change the name
     }
 
+	virtual void ReleaseFunctionValueSize() override // it's just zip matrix size into 1
+	{
+		Value().Resize(1, 1, 0, false);
+	}
+
     // -----------------------------------------------------------------------
     // forward propagation, backpropagation
     // -----------------------------------------------------------------------
@@ -1793,6 +1810,8 @@ public:
 
 class FlowControlNode : public ComputationNodeBase
 {
+public:
+
     typedef ComputationNodeBase Base;
 
 public:
@@ -1813,6 +1832,7 @@ public:
     virtual double Get00Element() const override { NOT_IMPLEMENTED; }
     virtual MatrixBasePtr ValuePtr() const override { NOT_IMPLEMENTED; }
     virtual void UpdateFunctionMBSize() override { NOT_IMPLEMENTED; }
+	virtual void ReleaseFunctionValueSize() override { NOT_IMPLEMENTED; }
     virtual void AttachInputs(const std::vector<ComputationNodeBasePtr>& inputs) override { NOT_IMPLEMENTED; }
     virtual void PrintSelf(bool) const override { NOT_IMPLEMENTED; }
     virtual void ValidateInferInputDimsFrom(const TensorShape&) override { NOT_IMPLEMENTED; }
@@ -1828,8 +1848,13 @@ public:
     virtual std::string FormatOperationPrototype(const std::string& extraArgs) const override { return ""; }
     virtual void DumpNodeInfo(const bool /*printValues*/, const bool /*printMetadata*/, File& fstream) const override {}
 
+	virtual void SetShadowNetwork(const ComputationNodeBasePtr& shadowNetwork) override { m_shadowNetwork = shadowNetwork; }
+
 protected: public:                                     // needed in ComputationNetwork::FindInRecurrentLoops(), which really should be part of SEQTraversalFlowControlNode
     std::vector<ComputationNodeBasePtr> m_nestedNodes; // nodes tucked away in this node, in evaluation order
+	std::unordered_map<wstring, wstring> m_recordNodes;
+	std::pair<wstring, wstring> m_section;
+	ComputationNodeBasePtr m_shadowNetwork;
 };
 
 // =======================================================================
