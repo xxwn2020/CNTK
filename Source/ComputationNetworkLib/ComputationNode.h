@@ -1391,7 +1391,6 @@ public:
         }
 #endif
 
-#ifdef _DEBUG
     virtual void /*IComputationNode::*/ EndBackprop() override
     {
         Base::EndBackprop();
@@ -1399,6 +1398,7 @@ public:
 			Value().Resize(1, 1, 0, false);
 			Gradient().Resize(1, 1, 0, false);
 		}
+#ifdef _DEBUG
 #ifdef TRACK_GAP_NANS
         for (size_t i = 0; i < m_inputs.size(); i++)
         {
@@ -1411,8 +1411,8 @@ public:
             }
         }
 #endif
-    }
 #endif
+    }
 
     // this is the entry point from Network; while it will call virtual BackpropTo() into the actual node implementation
     // TODO: move to -Base (or -Network?)
