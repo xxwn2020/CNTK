@@ -596,7 +596,7 @@ public:
         int compIndex = compareType > 0 ? 2 : (compareType == 0 ? 1 : 0);
         int polarityIndex = polarity == 0 ? 0 : 1;
         int opIndex = compIndex + 3 * polarityIndex;
-        result.DoBinaryOpOf(0, input0, input1, 1.0f,static_cast<ElementWiseOperator> (ElementWiseOperator::opEQ + opIndex), ElementWiseOperator::opSum);
+        result.DoBinaryOpOf(0, input0, input1, 1.0f, static_cast<ElementWiseOperator> (ElementWiseOperator::opLT + opIndex), ElementWiseOperator::opSum);
     }
 
     virtual void /*ComputationNode::*/ BackpropTo(const size_t inputIndex, const FrameRange& fr) override
