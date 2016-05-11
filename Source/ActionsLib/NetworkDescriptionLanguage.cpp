@@ -158,6 +158,12 @@ bool CheckFunction(std::string& p_nodeType, bool* allowUndeterminedVariable)
     else if (EqualInsensitive(nodeType, OperationNameOf(CRFNode), L"CRF")) ret = true;
 #endif
     else if (EqualInsensitive(nodeType, OperationNameOf(ClassBasedCrossEntropyWithSoftmaxNode), L"CBCEWithSM")) ret = true;
+    else if (EqualInsensitive(nodeType, OperationNameOf(CompEQNode))) ret = true;
+    else if (EqualInsensitive(nodeType, OperationNameOf(CompGENode))) ret = true;
+    else if (EqualInsensitive(nodeType, OperationNameOf(CompGTNode))) ret = true;
+    else if (EqualInsensitive(nodeType, OperationNameOf(CompLENode))) ret = true;
+    else if (EqualInsensitive(nodeType, OperationNameOf(CompLTNode))) ret = true;
+    else if (EqualInsensitive(nodeType, OperationNameOf(CompNENode))) ret = true;
     else if (EqualInsensitive(nodeType, OperationNameOf(ClipNode))) ret = true;
     else if (EqualInsensitive(nodeType, OperationNameOf(ConvolutionNode), L"Convolve")) ret = true;
     else if (EqualInsensitive(nodeType, OperationNameOf(PoolingNode))) ret = true;

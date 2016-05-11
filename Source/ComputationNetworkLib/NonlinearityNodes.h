@@ -562,4 +562,71 @@ public:
 template class ClipNode<float>;
 template class ClipNode<double>;
 
+
+// -----------------------------------------------------------------------
+// ComparsionNode(a,b)
+// -----------------------------------------------------------------------
+// Template parameters opType and polarity for selecting one of the six basic comprasions 
+template <class ElemType, int compareType, int polarity>
+class CompareNode : public BinaryElementWiseNode<ElemType>
+{
+    typedef BinaryElementWiseNode<ElemType> Base; UsingBinaryElementwiseNodeBaseMembers;
+    static const std::wstring TypeName() { return L""; }
+
+public:
+    DeclareConstructorFromConfigWithNumInputs(CompareNode);
+    CompareNode(DEVICEID_TYPE deviceId, const wstring& name)
+        : Base(deviceId, name)
+    {
+    }
+
+    virtual bool InputUsedInComputingInputNodesGradients(size_t childIndex)  const override { return childIndex == 0; }
+    virtual bool OutputUsedInComputingInputNodesGradients() const override { return false; }
+
+    virtual void /*ComputationNode::*/ ForwardProp(const FrameRange& fr) override
+    {
+        size_t rank = DetermineElementwiseTensorRank();
+        auto result = ValueTensorFor(rank, fr);
+        auto input0 = Input(0)->ValueTensorFor(rank, fr.AllowBroadcast());
+        auto input1 = Input(1)->ValueTensorFor(rank, fr.AllowBroadcast());
+
+        // The different compare operations have a fixed order in the opcodes: 
+        //          opLT, opEQ, opGT, opGE, opNE, opLE
+        // Therefore we can select the operation we like through simple index calculations.
+        int compIndex = compareType > 0 ? 2 : (compareType == 0 ? 1 : 0);
+        int polarityIndex = polarity == 0 ? 0 : 1;
+        int opIndex = compIndex + 3 * polarityIndex;
+        result.DoBinaryOpOf(0, input0, input1, 1.0f,static_cast<ElementWiseOperator> (ElementWiseOperator::opEQ + opIndex), ElementWiseOperator::opSum);
+    }
+
+    virtual void /*ComputationNode::*/ BackpropTo(const size_t inputIndex, const FrameRange& fr) override
+    {
+        // Function is picewise constant --> gradient = 0
+    }
+};
+
+template <class ElemType> using CompLTNode = CompareNode<ElemType, -1, 0>;
+template CompLTNode<float>;
+template CompLTNode<double>;
+
+template <class ElemType> using CompEQNode = CompareNode<ElemType,  0, 0>;
+template CompEQNode<float>;
+template CompEQNode<double>;
+
+template <class ElemType> using CompGTNode = CompareNode<ElemType,  1, 0>;
+template CompGTNode<float>;
+template CompGTNode<double>;
+
+template <class ElemType> using CompGENode = CompareNode<ElemType, -1, 1>;
+template CompGENode<float>;
+template CompGENode<double>;
+
+template <class ElemType> using CompNENode = CompareNode<ElemType,  0, 1>;
+template CompNENode<float>;
+template CompNENode<double>;
+
+template <class ElemType> using CompLENode = CompareNode<ElemType,  1, 1>;
+template CompLENode<float>;
+template CompLENode<double>;
+
 }}}
