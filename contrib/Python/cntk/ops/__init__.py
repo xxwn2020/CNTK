@@ -664,6 +664,22 @@ def input(shape, dynamic_axis='', name=None):
     from cntk.ops.cntk1 import Input
     return Input(shape, dynamicAxis=dynamic_axis, name=name)
 
+def sparse_input(shape, dynamic_axis='', name=None):
+    """
+    It creates a sparse input node. The graph requires a separate reader that will be
+    fed to this input.
+
+    Args:
+        shape (tuple): the shape of the input tensor
+        dynamic_axis (str or output of :func:`cntk.ops.dynamic_axis`): the dynamic axis
+        name (str): the name of the node in the network
+    Returns:
+        :class:`cntk.graph.ComputationNode`
+    """
+
+    from cntk.ops.cntk1 import SparseInput
+    return SparseInput(shape, dynamicAxis=dynamic_axis, name=name)
+
 
 def parameter(shape=None, value=None, learning_rate_multiplier=1.0,
         init_from_file_path=None, name=None):
