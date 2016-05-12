@@ -635,7 +635,7 @@ def input_numpy(value, alias=None, dynamic_axis='', name=None):
         else:
             cntk_shape = value[0].shape
 
-        node = input(cntk_shape, dynamic_axis=dynamic_axis)
+        node = input(cntk_shape, dynamic_axis=dynamic_axis, name=name)
         from ..reader import LazyInputReader
         node.reader = LazyInputReader(
             value,
