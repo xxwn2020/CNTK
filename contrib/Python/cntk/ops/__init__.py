@@ -664,6 +664,45 @@ def input(shape, dynamic_axis='', name=None):
     from cntk.ops.cntk1 import Input
     return Input(shape, dynamicAxis=dynamic_axis, name=name)
 
+
+def sparse_input_numpy(indices, values, shape, alias=None, dynamic_axis='', name=None):
+    '''
+    Creates an input node from a sparse input tensors described by a list of indices
+    and a list of values having a shape. The tensors represent one
+    sample and can have sequences of different lengths. 
+
+    Example:
+        >>> C.eval(C.sparse_input_numpy(TODO
+
+    Args:
+        indices (list): list of indices
+        values (list): list of values corresponding to indices
+        shape (tuple): shape of the input
+        alias (str): alias to be used in the data file
+        dynamic_axis (str): whether the tensor has already the data
+        alias (str): optional the alias to be used when serializing the data into an intermediate file
+    Returns:
+        :class:`cntk.graph.ComputationNode`
+    '''
+    from .. import utils
+    if utils.is_tensor_list(value) or utils.is_tensor(value):
+        value = np.asarray(value)
+
+        node = sparse_input(cntk_shape, dynamic_axis=dynamic_axis, name=name)
+        from ..reader import LazySparseInputReader
+        node.reader = LazySparseInputReader(
+            indices,
+            values,
+            shape,
+            input_alias=alias,
+            dynamic_axis=dynamic_axis,
+            node=node)
+
+        return node
+    else:
+        raise ValueError('value type is not supported: %s' % type(value))
+
+
 def sparse_input(shape, dynamic_axis='', name=None):
     """
     It creates a sparse input node. The graph requires a separate reader that will be

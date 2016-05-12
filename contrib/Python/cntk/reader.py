@@ -270,7 +270,36 @@ class CNTKTextFormatReader(AbstractReader):
         return template
 
 
-class LazyInputReader(object):
+class _LazyInputReaderBase(object):
+
+    '''
+    Base class of lazy readers that serializes the data to disk only when
+    the complete graph is specified. This is necessary in case of multiple
+    inputs, because they have to reside in the same file.
+
+    Note:
+        All readers of this type need to have the exact same number of samples,
+        as they will be aligned by the first index.
+
+    Note:
+        This class will be deprecated once the reader bundlers have arrived in
+        CNTK.
+
+    Args:
+        node (`_InputComputationNodeBase`): node to which this lazy reader is connected
+        input_alias (str): a short name for the input, it is how inputs are referenced in the data files. If not provided, it will be automatically assigned.
+        dynamic_axis (str or output of :func:`cntk.ops.dynamic_axis`): the dynamic axis packaged as sequences. If not, it will wrapped again in a sequence of length 1.
+    '''
+
+    def __init__(self, node, input_alias=None, dynamic_axis=''):
+        if not node._is_input():
+            raise ValueError('LazyInputReader needs an input node')
+
+        self.node = node
+        self.input_alias = input_alias
+        self.dynamic_axis = dynamic_axis
+
+class LazyInputReader(_LazyInputReaderBase):
 
     '''
     Lazy reader that takes an NumPy array and serializes it to disk only when
@@ -287,26 +316,19 @@ class LazyInputReader(object):
 
     Args:
         batch (ndarray): the data to be serialized.
-        node (`InputComputationNodeBase`): node to which this lazy reader is
-        connected
-        input_alias (str): a short name for the input, it is how inputs are
-        referenced in the data files. If not provided, it will be automatically
-        assigned.
-        dynamic_axis (str or output of :func:`cntk.ops.dynamic_axis`): the dynamic axis
-        packaged as sequences. If not, it will wrapped again in a sequence of
-        length 1.
+        node (`_InputComputationNodeBase`): node to which this lazy reader is connected
+        input_alias (str): a short name for the input, it is how inputs are referenced in the data files. If not provided, it will be automatically assigned.
+        dynamic_axis (str or output of :func:`cntk.ops.dynamic_axis`): the dynamic axis packaged as sequences. If not, it will wrapped again in a sequence of length 1.
     '''
 
     def __init__(self, batch, node, input_alias=None, dynamic_axis=''):
+        super(LazyInputReader, self).__init__(node, input_alias, dynamic_axis)
+
         if batch is None:
             raise ValueError(
                 'you initalized LazyInputReader without valid batch data')
 
         self.batch = batch
-        if not node._is_input():
-            raise ValueError('LazyInputReader needs an input node')
-
-        self.node = node
 
         sample = batch[0]
         if dynamic_axis:
@@ -315,8 +337,41 @@ class LazyInputReader(object):
         else:
             self.node.shape = np.asarray(sample).shape
 
-        self.input_alias = input_alias
-        self.dynamic_axis = dynamic_axis
+class LazySparseInputReader(_LazyInputReaderBase):
+
+    '''
+    Lazy reader that takes an NumPy array and serializes it to disk only when
+    the complete graph is specified. This is necessary in case of multiple
+    inputs, because they have to reside in the same file.
+
+    Note:
+        All readers of this type need to have the exact same number of samples,
+        as they will be aligned by the first index.
+
+    Note:
+        This class will be deprecated once the reader bundlers have arrived in
+        CNTK.
+
+    Args:
+        indices (list): list of indices
+        values (list): list of values corresponding to indices
+        shape (tuple): shape of the input
+        node (`_InputComputationNodeBase`): node to which this lazy reader is connected
+        input_alias (str): a short name for the input, it is how inputs are referenced in the data files. If not provided, it will be automatically assigned.
+        dynamic_axis (str or output of :func:`cntk.ops.dynamic_axis`): the dynamic axis packaged as sequences. If not, it will wrapped again in a sequence of length 1.
+    '''
+
+    def __init__(self, indices, values, shape, node, input_alias=None, dynamic_axis=''):
+        super(LazyInputReader, self).__init__(node, input_alias, dynamic_axis)
+
+        if batch is None or values is None or not shape:
+            raise ValueError(
+                'you initalized SparseLazyInputReader without valid initialization')
+
+        self.indices = indices
+        self.values = values
+
+        self.node.shape = shape
 
 
 class AbstractReaderAggregator(with_metaclass(ABCMeta, dict)):
@@ -529,7 +584,7 @@ class InputMap(object):
         sample_sizes = collections.defaultdict(list)
         used_aliases = set()
         for node in self.unmapped_nodes:
-            is_lazy_input = isinstance(node.reader, LazyInputReader)
+            is_lazy_input = isinstance(node.reader, _LazyInputReaderBase)
             if not (node._is_input() and is_lazy_input):
                 raise ValueError('expected NumPy input, but got "%s"'%str(node))
             
