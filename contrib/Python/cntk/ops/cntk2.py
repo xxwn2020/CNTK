@@ -127,9 +127,49 @@ class Plus(ComputationNode):
         self.params_with_defaults = []
         self.inputs = ['_', 'y']
 
+class LT(ComputationNode):
+    def __init__(self, _, y, op_name='CNTK2.LT', name=None):
+        super(LT, self).__init__(params=['_', 'y'], op_name=op_name, name=name)
+        self._ = _
+        self.y = y
+        self.params_with_defaults = []
+        self.inputs = ['_', 'y']
+
 class EQ(ComputationNode):
     def __init__(self, _, y, op_name='CNTK2.EQ', name=None):
         super(EQ, self).__init__(params=['_', 'y'], op_name=op_name, name=name)
+        self._ = _
+        self.y = y
+        self.params_with_defaults = []
+        self.inputs = ['_', 'y']
+
+class GT(ComputationNode):
+    def __init__(self, _, y, op_name='CNTK2.GT', name=None):
+        super(GT, self).__init__(params=['_', 'y'], op_name=op_name, name=name)
+        self._ = _
+        self.y = y
+        self.params_with_defaults = []
+        self.inputs = ['_', 'y']
+
+class GE(ComputationNode):
+    def __init__(self, _, y, op_name='CNTK2.GE', name=None):
+        super(GE, self).__init__(params=['_', 'y'], op_name=op_name, name=name)
+        self._ = _
+        self.y = y
+        self.params_with_defaults = []
+        self.inputs = ['_', 'y']
+
+class NE(ComputationNode):
+    def __init__(self, _, y, op_name='CNTK2.NE', name=None):
+        super(NE, self).__init__(params=['_', 'y'], op_name=op_name, name=name)
+        self._ = _
+        self.y = y
+        self.params_with_defaults = []
+        self.inputs = ['_', 'y']
+
+class LE(ComputationNode):
+    def __init__(self, _, y, op_name='CNTK2.LE', name=None):
+        super(LE, self).__init__(params=['_', 'y'], op_name=op_name, name=name)
         self._ = _
         self.y = y
         self.params_with_defaults = []
