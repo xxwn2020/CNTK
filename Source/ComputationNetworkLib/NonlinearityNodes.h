@@ -572,15 +572,22 @@ class CompareNode : public BinaryElementWiseNode<ElemType>
 {
 private:
     // Index corresponds to different comparison operations. 
-    // The operations are index the same order they appear in enum ElementWiseOperator: "LT", "EQ", "GT", "GE", "NE", "LE" 
     const static int index = 1 + compType + 3 * polarity;
+
+	// The operations are indexed in the same order they appear in enum ElementWiseOperator: "LT", "EQ", "GT", "GE", "NE", "LE".
+	// This ordering is checked below:
+	static_assert(1 == ElementWiseOperator::opEQ - ElementWiseOperator::opLT, "ElementWiseOperator::opEQ has wrong value relative to ElementWiseOperator::opLT");
+	static_assert(2 == ElementWiseOperator::opGT - ElementWiseOperator::opLT, "ElementWiseOperator::opGT has wrong value relative to ElementWiseOperator::opLT");
+	static_assert(3 == ElementWiseOperator::opGE - ElementWiseOperator::opLT, "ElementWiseOperator::opGE has wrong value relative to ElementWiseOperator::opLT");
+	static_assert(4 == ElementWiseOperator::opNE - ElementWiseOperator::opLT, "ElementWiseOperator::opNE has wrong value relative to ElementWiseOperator::opLT");
+	static_assert(5 == ElementWiseOperator::opLE - ElementWiseOperator::opLT, "ElementWiseOperator::opLE has wrong value relative to ElementWiseOperator::opLT");
 
 public:
     typedef BinaryElementWiseNode<ElemType> Base; UsingBinaryElementwiseNodeBaseMembers;
 
     static const std::wstring TypeName()
     {
-        const wchar_t* names[] = { L"LT", L"EQ", L"GT", L"GE", L"NE", L"LE" };
+		const wchar_t* names[] = { L"LT", L"EQ", L"GT", L"GE", L"NE", L"LE" };
         return names[index];
     }
 
@@ -605,7 +612,7 @@ public:
 
     virtual void /*ComputationNode::*/ BackpropTo(const size_t inputIndex, const FrameRange& fr) override
     {
-        // Function is picewise constant --> gradient = 0
+        // Function is piecewise constant --> gradient = 0
     }
 };
 
