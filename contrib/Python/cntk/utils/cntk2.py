@@ -104,9 +104,23 @@ class ElementTimes(ComputationNode):
         self.params_with_defaults = []
         self.inputs = ['_', 'y']
 
+class Exp(ComputationNode):
+    def __init__(self, _, op_name='CNTK2.Exp', name=None):
+        super(Exp, self).__init__(params=['_'], op_name=op_name, name=name)
+        self._ = _
+        self.params_with_defaults = []
+        self.inputs = ['_']
+
 class Floor(ComputationNode):
     def __init__(self, _, op_name='CNTK2.Floor', name=None):
         super(Floor, self).__init__(params=['_'], op_name=op_name, name=name)
+        self._ = _
+        self.params_with_defaults = []
+        self.inputs = ['_']
+
+class Log(ComputationNode):
+    def __init__(self, _, op_name='CNTK2.Log', name=None):
+        super(Log, self).__init__(params=['_'], op_name=op_name, name=name)
         self._ = _
         self.params_with_defaults = []
         self.inputs = ['_']
@@ -126,6 +140,13 @@ class Plus(ComputationNode):
         self.y = y
         self.params_with_defaults = []
         self.inputs = ['_', 'y']
+
+class Sqrt(ComputationNode):
+    def __init__(self, _, op_name='CNTK2.Sqrt', name=None):
+        super(Sqrt, self).__init__(params=['_'], op_name=op_name, name=name)
+        self._ = _
+        self.params_with_defaults = []
+        self.inputs = ['_']
 
 class Tanh(ComputationNode):
     def __init__(self, _, op_name='CNTK2.Tanh', name=None):
@@ -191,38 +212,3 @@ class ErrorPrediction(ComputationNode):
         self.params_with_defaults = []
         self.inputs = ['_', 'outVectorSequence']
 
-class Log(ComputationNode):
-    def __init__(self, _, op_name='CNTK2.Log', name=None):
-        super(Log, self).__init__(params=['_'], op_name=op_name, name=name)
-        self._ = _
-        self.params_with_defaults = []
-        self.inputs = ['_']
-
-class Exp(ComputationNode):
-    def __init__(self, _, op_name='CNTK2.Exp', name=None):
-        super(Exp, self).__init__(params=['_'], op_name=op_name, name=name)
-        self._ = _
-        self.params_with_defaults = []
-        self.inputs = ['_']
-        
-class Sqrt(ComputationNode):
-    def __init__(self, _, op_name='CNTK2.Sqrt', name=None):
-        super(Sqrt, self).__init__(params=['_'], op_name=op_name, name=name)
-        self._ = _
-        self.params_with_defaults = []
-        self.inputs = ['_']        
-        
-class Square(ComputationNode):
-    def __init__(self, _, op_name='CNTK2.Square', name=None):
-        super(Square, self).__init__(params=['_'], op_name=op_name, name=name)
-        self._ = _
-        self.params_with_defaults = []
-        self.inputs = ['_']                
-
-class Power(ComputationNode):
-    def __init__(self, _, y, op_name='CNTK2.Power', name=None):
-        super(Power, self).__init__(params=['_', 'y'], op_name=op_name, name=name)
-        self._ = _
-        self.y = y
-        self.params_with_defaults = []
-        self.inputs = ['_', 'y']        
