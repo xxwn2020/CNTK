@@ -25,6 +25,11 @@ def precision(request):
     return request.param
 
 
+@pytest.fixture(params=["dense", "sparse"])
+def matrix_type(request):
+    return request.param
+
+
 def unittest_helper(root_node, input_numpy, expected, device_id=-1, precision="float",
                     clean_up=True, backward_pass=False, input_node=None):
     from cntk.context import get_new_context

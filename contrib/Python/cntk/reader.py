@@ -239,12 +239,11 @@ class CNTKTextFormatReader(AbstractReader):
                 param_dict['format'] = 'dense'
             
             if not 'dim' in param_dict:
-                if isinstance(node_or_name.reader, LazyInputReader):
+                if isinstance(node_or_name.reader, _LazyInputReaderBase):
                     lazy = node_or_name.reader
-                    param_dict['dim'] = np.multiply.reduce(lazy.shape)
+                    param_dict.update(node_or_name.reader.param_dict)
                 else:
                     raise ValueError('parameter "dim" not specified for node "%s"'%str(node_or_name))
-
 
             indent =5*MODEL_INDENTATION*' '
             params = ['%s%s = %s'%(indent, k,v) for k,v in
@@ -330,12 +329,44 @@ class LazyInputReader(_LazyInputReaderBase):
 
         self.batch = batch
 
-        sample = batch[0]
-        if dynamic_axis:
-            # collecting the shapes ignoring the dynamic axis
-            self.node.shape = np.asarray(sample).shape[1:]
-        else:
-            self.node.shape = np.asarray(sample).shape
+        shapes_in_tensor = set()
+        # make sure that modulo dynamic axis all tensors of one lazy input have
+        # the same shape
+        for tensor in self.batch:
+            if isinstance(tensor, list):
+                tensor = np.asarray(tensor)
+
+            if self.dynamic_axis:
+                # collecting the shapes ignoring the dynamic axis
+                shapes_in_tensor.add(tensor.shape[1:])
+            else:
+                shapes_in_tensor.add(tensor.shape)
+
+        # ignoring the dynamic axis, all shapes should be equal
+        if len(shapes_in_tensor) != 1:
+            raise ValueError('except for the sequence dimensions all shapes ' +
+                             'should be the same - instead we %s' %
+                             (", ".join(str(s) for s in shapes_in_tensor)))
+
+        shape = shapes_in_tensor.pop()
+        if not shape:
+            shape = (1,)
+
+        self.shape = self.node.shape = shape
+
+        self.param_dict = {}
+        self.param_dict['dim'] = np.multiply.reduce(self.shape)
+        self.param_dict['format'] = 'dense'
+
+    def batch_size(self):
+        return len(self.batch)
+
+    def data_of_sample(self, idx):
+        data = self.batch[idx]
+        if not self.dynamic_axis:
+            data = np.asarray([data])
+
+        return data
 
 class LazySparseInputReader(_LazyInputReaderBase):
 
@@ -362,17 +393,37 @@ class LazySparseInputReader(_LazyInputReaderBase):
     '''
 
     def __init__(self, indices, values, shape, node, input_alias=None, dynamic_axis=''):
-        super(LazyInputReader, self).__init__(node, input_alias, dynamic_axis)
+        super(LazySparseInputReader, self).__init__(node, input_alias, dynamic_axis)
 
-        if batch is None or values is None or not shape:
+        if not indices or not values or not shape:
             raise ValueError(
-                'you initalized SparseLazyInputReader without valid initialization')
+                'you initalized LazySparseInputReader without valid initialization')
+
+        if not len(indices) == len(values):
+            raise ValueError('indices has different length than values')
 
         self.indices = indices
         self.values = values
 
-        self.node.shape = shape
+        self.shape = self.node.shape = shape
 
+        self.param_dict = {}
+        self.param_dict['dim'] = np.multiply.reduce(self.shape)
+        self.param_dict['format'] = 'sparse'
+
+    def batch_size(self):
+        return len(self.indices)
+
+    def data_of_sample(self, idx):
+        indices = self.indices[idx]
+        values = self.values[idx]
+
+        data = dict(zip(indices,values))
+
+        if not self.dynamic_axis:
+            data = [data]
+
+        return data
 
 class AbstractReaderAggregator(with_metaclass(ABCMeta, dict)):
 
@@ -602,32 +653,8 @@ class InputMap(object):
                 used_aliases.add(new_alias)
 
             # keep track of sample sizes
-            sample_sizes[len(l.batch)].append(l.input_alias)
+            sample_sizes[l.batch_size()].append(l.input_alias)
 
-            shapes_in_tensor = set()
-
-            # make sure that modulo dynamic axis all tensors of one lazy input have
-            # the same shape
-            for tensor in l.batch:
-                if isinstance(tensor, list):
-                    tensor = np.asarray(tensor)
-
-                if l.dynamic_axis:
-                    # collecting the shapes ignoring the dynamic axis
-                    shapes_in_tensor.add(tensor.shape[1:])
-                else:
-                    shapes_in_tensor.add(tensor.shape)
-
-            # ignoring the dynamic axis, all shapes should be equal
-            if len(shapes_in_tensor) != 1:
-                raise ValueError('except for the sequence dimensions all shapes ' +
-                                 'should be the same - instead we %s' %
-                                 (", ".join(str(s) for s in shapes_in_tensor)))
-
-            # shapes_in_tensor now contains only one shape, which has the sequence
-            # dimension removed.
-            value_shape = shapes_in_tensor.pop()
-            l.shape = value_shape if value_shape else (1,)
 
             self.node_map[node] = { 'alias': l.input_alias }
 
@@ -644,10 +671,7 @@ class InputMap(object):
                 alias_tensor_map = {}
                 for node in self.unmapped_nodes:
                     l = node.reader
-                    if l.dynamic_axis:
-                        alias_tensor_map[l.input_alias] = l.batch[idx]
-                    else:
-                        alias_tensor_map[l.input_alias] = np.asarray([l.batch[idx]])
+                    alias_tensor_map[l.input_alias] = l.data_of_sample(idx)
                 f.write(tensors_to_text_format(idx, alias_tensor_map) + '\n')
 
         self.unmapped_nodes.clear()

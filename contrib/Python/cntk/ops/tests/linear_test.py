@@ -11,7 +11,7 @@ the forward and the backward pass
 
 import numpy as np
 import pytest
-from .ops_test_utils import unittest_helper, AA, I, precision
+from .ops_test_utils import unittest_helper, AA, I, SI, precision, batch_dense_to_sparse, matrix_type
 from ...graph import *
 from .. import *
 from ...reader import *
@@ -39,7 +39,7 @@ TENSOR_PAIRS = [
 
 
 @pytest.mark.parametrize("left_operand, right_operand", TENSOR_PAIRS)
-def test_op_plus(left_operand, right_operand, device_id, precision):
+def test_op_plus(left_operand, right_operand, device_id, precision, matrix_type):
     # Forward pass test
     #==================
     # we compute the expected output for the forward pass
@@ -48,50 +48,23 @@ def test_op_plus(left_operand, right_operand, device_id, precision):
     # the second for batch of one sample
     expected = [[AA(left_operand) + AA(right_operand)]]
 
-    a = I([left_operand])
-    b = I([right_operand])
+    if matrix_type == 'sparse':
+        if device_id<0:
+            pytest.skip('plus not defined for CPU/sparse')
+
+        a = SI(*batch_dense_to_sparse([left_operand]))
+        b = SI(*batch_dense_to_sparse([right_operand]))
+    else:
+        a = I([left_operand])
+        b = I([right_operand])
 
     left_as_input = a + right_operand
     unittest_helper(left_as_input, None, expected, device_id=device_id,
-                    precision=precision, clean_up=True, backward_pass=False)
+                    precision=precision, clean_up=False, backward_pass=False)
 
     right_as_input = left_operand + b
     unittest_helper(right_as_input, None, expected, device_id=device_id,
-                    precision=precision, clean_up=True, backward_pass=False)
-
-    unittest_helper(a + b, None, expected, device_id=device_id,
-                    precision=precision, clean_up=True, backward_pass=False)
-
-    # Backward pass test
-    #==================
-    # the expected results for the backward pass is all ones
-    expected = [[[np.ones_like(x) for x in left_operand]]]
-    unittest_helper(left_as_input, None, expected, device_id=device_id,
-                    precision=precision, clean_up=True, backward_pass=True, input_node=a)
-    unittest_helper(right_as_input, None, expected, device_id=device_id,
-                    precision=precision, clean_up=True, backward_pass=True, input_node=b)
-
-@pytest.mark.parametrize("left_operand, right_operand", TENSOR_PAIRS)
-def test_op_plus_sparse(left_operand, right_operand, device_id, precision):
-    # Forward pass test
-    #==================
-    # we compute the expected output for the forward pass
-    # we need two surrounding brackets
-    # the first for sequences (length=1, since we have dynamic_axis='')
-    # the second for batch of one sample
-    from cntk.ops import sparse_input_numpy as I
-    expected = [[AA(left_operand) + AA(right_operand)]]
-
-    a = I([left_operand])
-    b = I([right_operand])
-
-    left_as_input = a + right_operand
-    unittest_helper(left_as_input, None, expected, device_id=device_id,
-                    precision=precision, clean_up=True, backward_pass=False)
-
-    right_as_input = left_operand + b
-    unittest_helper(right_as_input, None, expected, device_id=device_id,
-                    precision=precision, clean_up=True, backward_pass=False)
+                    precision=precision, clean_up=False, backward_pass=False)
 
     unittest_helper(a + b, None, expected, device_id=device_id,
                     precision=precision, clean_up=True, backward_pass=False)
@@ -106,7 +79,6 @@ def test_op_plus_sparse(left_operand, right_operand, device_id, precision):
                     precision=precision, clean_up=True, backward_pass=True, input_node=b)
 
 # -- minus operation tests --
-
 
 @pytest.mark.parametrize("left_operand, right_operand", TENSOR_PAIRS)
 def test_op_minus(left_operand, right_operand, device_id, precision):

@@ -15,13 +15,14 @@ from cntk.tests.test_utils import *
 
 from ...context import get_new_context
 from ...reader import *
-from .. import constant, input_numpy
+from .. import constant, input_numpy, sparse_input_numpy
 
 
 # Keeping things short
 I = input_numpy
+SI = sparse_input_numpy
 
-def dense_to_sparse(batch, dynamic_axis=''):
+def batch_dense_to_sparse(batch, dynamic_axis=''):
     '''
     Helper test function that converts a batch of dense tensors into sparse
     representation that can be consumed by :func:`cntk.ops.sparse_input_numpy`.
@@ -55,15 +56,16 @@ def dense_to_sparse(batch, dynamic_axis=''):
                              'should be the same - instead we %s' %
                              (", ".join(str(s) for s in shapes_in_tensor)))
 
-        t_indices, t_values = zip(*np.ndenumerate(tensor))
+        t_indices = range(tensor.size)
+        t_values = tensor.ravel(order='F')
 
         batch_indices.append(list(t_indices))
         batch_values.append(list(t_values))
 
     return batch_indices, batch_values, shapes_in_tensor.pop()
 
-def test_dense_to_sparse():
-    i, v, s = dense_to_sparse(
+def test_batch_dense_to_sparse():
+    i, v, s = batch_dense_to_sparse(
             [
                 [[1,2,3], [4,5,6]],
                 [[10,20,30], [40,50,60]],

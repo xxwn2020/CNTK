@@ -675,7 +675,7 @@ def sparse_input_numpy(indices, values, shape, alias=None, dynamic_axis='', name
         >>> C.eval(C.sparse_input_numpy(TODO
 
     Args:
-        indices (list): list of indices
+        indices (list): list of indices after flattening the tensor with `order='F'`
         values (list): list of values corresponding to indices
         shape (tuple): shape of the input
         alias (str): alias to be used in the data file
@@ -684,23 +684,18 @@ def sparse_input_numpy(indices, values, shape, alias=None, dynamic_axis='', name
     Returns:
         :class:`cntk.graph.ComputationNode`
     '''
-    from .. import utils
-    if utils.is_tensor_list(value) or utils.is_tensor(value):
-        value = np.asarray(value)
 
-        node = sparse_input(cntk_shape, dynamic_axis=dynamic_axis, name=name)
-        from ..reader import LazySparseInputReader
-        node.reader = LazySparseInputReader(
-            indices,
-            values,
-            shape,
-            input_alias=alias,
-            dynamic_axis=dynamic_axis,
-            node=node)
+    node = sparse_input(shape, dynamic_axis=dynamic_axis, name=name)
+    from ..reader import LazySparseInputReader
+    node.reader = LazySparseInputReader(
+        indices,
+        values,
+        shape,
+        input_alias=alias,
+        dynamic_axis=dynamic_axis,
+        node=node)
 
-        return node
-    else:
-        raise ValueError('value type is not supported: %s' % type(value))
+    return node
 
 
 def sparse_input(shape, dynamic_axis='', name=None):
