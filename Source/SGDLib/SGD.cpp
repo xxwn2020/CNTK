@@ -330,7 +330,6 @@ void SGD<ElemType>::TrainOrAdaptModel(int startEpoch, ComputationNetworkPtr net,
             "or an explicit learning rate must be specified in config for the starting epoch.");
     }
 
-    unsigned long dropOutSeed = 1;
     double prevDropoutRate = 0;
     double prevNormalizationTimeConstant = 0;
     double prevNormalizationBlendTimeConstant = 0;
@@ -365,7 +364,10 @@ void SGD<ElemType>::TrainOrAdaptModel(int startEpoch, ComputationNetworkPtr net,
         timer.Start();
 
         // set dropout rate for this epoch
-        ComputationNetwork::SetDropoutRate<ElemType>(net, criterionNodes[0], m_dropoutRates[i], prevDropoutRate, dropOutSeed);
+        // We use the same seed across workers until parallel training kicks in to ensure that the workers have identical models
+        size_t parallelWorkerIdx = ((m_mpi == nullptr) || !UseParallelTrain(i)) ? 0 : m_mpi->CurrentNodeRank();
+        size_t dropoutRandSeedBase = (parallelWorkerIdx * m_maxEpochs) + i;
+        ComputationNetwork::SetDropoutRate<ElemType>(net, criterionNodes[0], m_dropoutRates[i], prevDropoutRate, dropoutRandSeedBase);
         ComputationNetwork::SetBatchNormalizationTimeConstants<ElemType>(net, criterionNodes[0], 
                                                                          m_batchNormalizationTimeConstant[i], prevNormalizationTimeConstant,
                                                                          m_batchNormalizationBlendTimeConstant[i], prevNormalizationBlendTimeConstant);
@@ -645,31 +647,58 @@ void SGD<ElemType>::TrainOrAdaptModel(int startEpoch, ComputationNetworkPtr net,
             m_mpi->WaitAll();
         }
 
-        // persist model and check-point info
+        // Persist model and check-point info
         if ((m_mpi == nullptr) || m_mpi->IsMainNode())
         {
-            SaveCheckPointInfo(i, totalTrainingSamplesSeen, learnRatePerSample, smoothedGradients, prevCriterion, chosenMinibatchSize);
-            auto modelName = GetModelNameForEpoch(i);
-            LOGPRINTF(stderr, "SGD: Saving checkpoint model '%ls'\n", modelName.c_str());
-            net->Save(modelName);
-            if (!m_keepCheckPointFiles)
+            if (loadedPrevModel)
             {
-                // delete previous checkpoint file to save space
-                if (m_autoLearnRateSearchType == LearningRateSearchAlgorithm::AdjustAfterEpoch && m_loadBestModel)
+                // If previous best model is loaded, we will first remove epochs that lead to worse results
+                for (int j = 1; j < m_learnRateAdjustInterval; j++)
                 {
-                    if (epochsSinceLastLearnRateAdjust != 1)
+                    int epochToDelete = i - j;
+                    LOGPRINTF(stderr, "SGD: removing model and checkpoint files for epoch %d after rollback to epoch %lu\n", epochToDelete + 1, (size_t)(i - m_learnRateAdjustInterval) + 1);  // report 1 based epoch number
+                    _wunlink(GetModelNameForEpoch(epochToDelete).c_str());
+                    _wunlink(GetCheckPointFileNameForEpoch(epochToDelete).c_str());
+                }
+
+                // Set i back to the loaded model
+                i -= m_learnRateAdjustInterval;
+                LOGPRINTF(stderr, "SGD: revoke back to and update checkpoint file for epoch %d\n", i+1); // report 1 based epoch number
+                SaveCheckPointInfo(i, totalTrainingSamplesSeen, learnRatePerSample, smoothedGradients, prevCriterion, chosenMinibatchSize);
+            }
+            else
+            {
+                SaveCheckPointInfo(i, totalTrainingSamplesSeen, learnRatePerSample, smoothedGradients, prevCriterion, chosenMinibatchSize);
+                auto modelName = GetModelNameForEpoch(i);
+                LOGPRINTF(stderr, "SGD: Saving checkpoint model '%ls'\n", modelName.c_str());
+                net->Save(modelName);
+                if (!m_keepCheckPointFiles)
+                {
+                    // delete previous checkpoint file to save space
+                    if (m_autoLearnRateSearchType == LearningRateSearchAlgorithm::AdjustAfterEpoch && m_loadBestModel)
+                    {
+                        if (epochsSinceLastLearnRateAdjust != 1)
+                        {
+                            _wunlink(GetCheckPointFileNameForEpoch(i - 1).c_str());
+                        }
+                        if (epochsSinceLastLearnRateAdjust == m_learnRateAdjustInterval)
+                        {
+                            _wunlink(GetCheckPointFileNameForEpoch(i - m_learnRateAdjustInterval).c_str());
+                        }
+                    }
+                    else
                     {
                         _wunlink(GetCheckPointFileNameForEpoch(i - 1).c_str());
                     }
-                    if (epochsSinceLastLearnRateAdjust == m_learnRateAdjustInterval)
-                    {
-                        _wunlink(GetCheckPointFileNameForEpoch(i - m_learnRateAdjustInterval).c_str());
-                    }
                 }
-                else
-                {
-                    _wunlink(GetCheckPointFileNameForEpoch(i - 1).c_str());
-                }
+            }
+        }
+        else
+        {
+            if (loadedPrevModel)
+            {
+                // Set i back to the loaded model
+                i -= m_learnRateAdjustInterval;
             }
         }
 
@@ -742,13 +771,9 @@ size_t SGD<ElemType>::TrainOneEpoch(ComputationNetworkPtr net,
 
     int numMBsRun = 0;
 
-    bool useGradientAggregation = ((GetParallelizationMethod() == ParallelizationMethod::dataParallelSGD) &&
-                                   (epochNumber >= m_parallelizationStartEpochNum));
-    bool useModelAggregation = ((GetParallelizationMethod() == ParallelizationMethod::modelAveragingSGD || 
-                                 GetParallelizationMethod() == ParallelizationMethod::blockMomentumSGD) 
-                                &&
-                              (epochNumber >= m_parallelizationStartEpochNum));
-    bool useParallelTrain = useGradientAggregation || useModelAggregation;
+    bool useGradientAggregation = UseGradientAggregation(epochNumber);
+    bool useModelAggregation = UseModelAggregation(epochNumber);
+    bool useParallelTrain = UseParallelTrain(epochNumber);
 
     // MA-related variables
     size_t nSamplesSinceLastModelSync = 0;
@@ -861,6 +886,11 @@ size_t SGD<ElemType>::TrainOneEpoch(ComputationNetworkPtr net,
 
         nSamplesSinceLastModelSync += actualMBSize;
 
+        // Dropout nodes have an implicit input in the form of the random mask that is applied to its explicit input
+        // This mask is regerated every minibatch and hence dropout nodes with a non-zero dropout rate must me marked outdated
+        // w.r.t. inputs to force evaluation in each minibatch
+        MarkDropoutNodesEvalTimeStampAsOutdated(net, criterionNodes[0]);
+
         // node data was changed
         // TODO: move this to that function as well--just tired to pass everything as arguments
         // TODO: We should do this right after the GetMinibatch() call, since that's where these changed.
@@ -935,13 +965,14 @@ size_t SGD<ElemType>::TrainOneEpoch(ComputationNetworkPtr net,
                 smbDispatcher.DoneWithCurrentMinibatch();
         } // if (actualMBSize > 0)
 
-        // for progress and statistics, we should only count frames that are not gaps
-        // BUGBUG: Once we have multiple layouts, this must be done on a per-criterion basis.
-        size_t numSamplesWithLabel = wasDataRead ? net->GetNumSamplesWithLabelOfNetwork(actualMBSize) : 0;
+        // for momentum/clipping/regularization/etc., as well as for progress and statistics, we should only count frames that are not gaps
+        // #samples according to the default dynamic axis, for use with criterion nodes that do not have an MBLayout
+        size_t numSamplesWithLabelOfNetwork = wasDataRead ? net->GetNumSamplesWithLabelOfNetwork(actualMBSize) : 0;
 
         // Sum of actualMBSize across all nodes when using parallel training
+        // 'aggregate' here means accross-worker aggregate for this one minibatch.
         size_t aggregateNumSamples = actualMBSize;
-        size_t aggregateNumSamplesWithLabel = numSamplesWithLabel;
+        size_t aggregateNumSamplesWithLabel = CriterionAccumulator<ElemType>::GetNumSamples(criterionNodes[0], numSamplesWithLabelOfNetwork);
 
         if (!useGradientAggregation)
         {
@@ -950,9 +981,9 @@ size_t SGD<ElemType>::TrainOneEpoch(ComputationNetworkPtr net,
             {
                 assert(wasDataRead);
                 // criteria are in Value()(0,0), we accumulate into another 1x1 Matrix (to avoid having to pull the values off the GPU)
-                localEpochCriterion.Add(criterionNodes, 0, numSamplesWithLabel);
+                localEpochCriterion.Add(criterionNodes, 0, numSamplesWithLabelOfNetwork);
                 for (size_t i = 0; i < evaluationNodes.size(); i++)
-                    localEpochEvalErrors.Add(evaluationNodes, i, numSamplesWithLabel);
+                    localEpochEvalErrors.Add(evaluationNodes, i, numSamplesWithLabelOfNetwork);
             }
         }
         else
@@ -985,9 +1016,9 @@ size_t SGD<ElemType>::TrainOneEpoch(ComputationNetworkPtr net,
             m_gradHeader->numEvalNode = evaluationNodes.size();
             m_gradHeader->numSamples = actualMBSize;
             // hoist the criterion into CPU space for all-reduce
-            localEpochCriterion.Assign(criterionNodes, 0, numSamplesWithLabel);
+            localEpochCriterion.Assign(criterionNodes, 0, numSamplesWithLabelOfNetwork);
             for (size_t i = 0; i < evaluationNodes.size(); i++)
-                localEpochEvalErrors.Assign(evaluationNodes, i, numSamplesWithLabel);
+                localEpochEvalErrors.Assign(evaluationNodes, i, numSamplesWithLabelOfNetwork);
             m_gradHeader->numSamplesWithLabel = localEpochCriterion.GetCriterion(0).second;
             m_gradHeader->criterion           = localEpochCriterion.GetCriterion(0).first;
             for (size_t i = 0; i < evaluationNodes.size(); i++)
@@ -1006,6 +1037,16 @@ size_t SGD<ElemType>::TrainOneEpoch(ComputationNetworkPtr net,
         // update model parameters
         if ((aggregateNumSamples > 0) && (learnRatePerSample > m_minLearnRate * 0.01))
         {
+#if 1       // BUGBUG: We must skip gaps in our momentum, clipping, regularization etc. criteria.
+            // This will break test cases. So for now, we will only enable this for per-sample criteria.
+            size_t numSamplesInMinibatch = aggregateNumSamples;
+            if (criterionNodes[0]->HasMBLayout())
+#endif
+            numSamplesInMinibatch = aggregateNumSamplesWithLabel;
+#if 0
+            if (numSamplesInMinibatch != aggregateNumSamples)
+                fprintf(stderr, "SGD: using true #samples %d instead of MB size %d\n", (int)numSamplesInMinibatch, (int)aggregateNumSamples);
+#endif
             auto smoothedGradientIter = smoothedGradients.begin();
             for (auto nodeIter = learnableNodes.begin(); nodeIter != learnableNodes.end(); nodeIter++, smoothedGradientIter++)
             {
@@ -1019,7 +1060,7 @@ size_t SGD<ElemType>::TrainOneEpoch(ComputationNetworkPtr net,
 #endif
                     // BUGBUG (Issue #95): Access to net MBLayout can no longer be done if we have multiple input layouts
                     UpdateWeights(node, smoothedGradient, learnRatePerSample,
-                                  GetMomentumPerSample(epochNumber /*BUGBUG workaround:*/, net->GetMBLayoutPtrOfNetwork()->GetNumParallelSequences()), aggregateNumSamples,
+                                  GetMomentumPerSample(epochNumber /*BUGBUG workaround:*/, net->GetMBLayoutPtrOfNetwork()->GetNumParallelSequences()), numSamplesInMinibatch,
                                   m_L2RegWeight, m_L1RegWeight,
                                   m_needAveMultiplier, m_useNesterovMomentum);
 #ifdef _DEBUG
@@ -1090,7 +1131,7 @@ size_t SGD<ElemType>::TrainOneEpoch(ComputationNetworkPtr net,
                     mbProgNumPrecision = max(mbProgNumPrecision - 2, 2);
                 }
             }
-            else // TODO: What's the meaning of this? Some sort of extrapolation?
+            else // estimate epoch size
                 m_maxComputedEpochSize = numMBsRun * trainSamplesSinceLastLogged / m_numMBsToShowResult;
 
             // progress tracing for compute cluster management
@@ -1986,6 +2027,7 @@ void SGD<ElemType>::SaveCheckPointInfo(const size_t epoch, const size_t totalSam
             fstream.Flush();
         }
 
+        _wunlink(checkPointFileName.c_str());
         renameOrDie(tempFileName, checkPointFileName);
     }
 }
@@ -2250,6 +2292,14 @@ void SGD<ElemType>::InitializeAndCheckBlockMomentumSGDParameters()
     m_blockMomentumAsTimeConstant = 0.0; 
     m_blockLearningRate= 1.0; 
 #endif 
+}
+
+template <class ElemType>
+void SGD<ElemType>::MarkDropoutNodesEvalTimeStampAsOutdated(const ComputationNetworkPtr& net, const ComputationNodeBasePtr& criterionNode)
+{
+    list<ComputationNodeBasePtr> dropoutNodes = net->GetNodesWithType(OperationNameOf(DropoutNode), criterionNode);
+    for (auto& nodeIter : dropoutNodes)
+        nodeIter->SetEvalTimeStampOutdatedWrtAll();
 }
 
 template class SGD<float>;
