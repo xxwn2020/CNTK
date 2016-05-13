@@ -38,14 +38,14 @@ static shared_ptr<ComputationNode<ElemType>> CreateStandardNode(const std::wstri
          if (nodeType == OperationNameOf(CRFNode))                              return New<CRFNode<ElemType>>(forward<_Types>(_Args)...);
     else
 #endif
-    if (nodeType == OperationNameOf(AbsNode))                              return New<AbsNode<ElemType>>(forward<_Types>(_Args)...);
+        if (nodeType == OperationNameOf(AbsNode))                                   return New<AbsNode<ElemType>>(forward<_Types>(_Args)...);
     //opLT, opEQ, opGT, opGE, opNE, opLE
-    else if (nodeType == OperationNameOf(CompLTNode))                             return New<CompLTNode<ElemType>>(forward<_Types>(_Args)...);
-    else if (nodeType == OperationNameOf(CompEQNode))                             return New<CompEQNode<ElemType>>(forward<_Types>(_Args)...);
-    else if (nodeType == OperationNameOf(CompGTNode))                             return New<CompGTNode<ElemType>>(forward<_Types>(_Args)...);
-    else if (nodeType == OperationNameOf(CompGENode))                             return New<CompGENode<ElemType>>(forward<_Types>(_Args)...);
-    else if (nodeType == OperationNameOf(CompNENode))                             return New<CompNENode<ElemType>>(forward<_Types>(_Args)...);
-    else if (nodeType == OperationNameOf(CompLENode))                             return New<CompLENode<ElemType>>(forward<_Types>(_Args)...);
+    else if (nodeType == OperationNameOf(CompLTNode))                           return New<CompLTNode<ElemType>>(forward<_Types>(_Args)...);
+    else if (nodeType == OperationNameOf(CompEQNode))                           return New<CompEQNode<ElemType>>(forward<_Types>(_Args)...);
+    else if (nodeType == OperationNameOf(CompGTNode))                           return New<CompGTNode<ElemType>>(forward<_Types>(_Args)...);
+    else if (nodeType == OperationNameOf(CompGENode))                           return New<CompGENode<ElemType>>(forward<_Types>(_Args)...);
+    else if (nodeType == OperationNameOf(CompNENode))                           return New<CompNENode<ElemType>>(forward<_Types>(_Args)...);
+    else if (nodeType == OperationNameOf(CompLENode))                           return New<CompLENode<ElemType>>(forward<_Types>(_Args)...);
     else if (nodeType == OperationNameOf(ClassBasedCrossEntropyWithSoftmaxNode))return New<ClassBasedCrossEntropyWithSoftmaxNode<ElemType>>(forward<_Types>(_Args)...);
     else if (nodeType == OperationNameOf(ClipNode))                             return New<ClipNode<ElemType>>(forward<_Types>(_Args)...);
     else if (nodeType == OperationNameOf(CosDistanceNode))                      return New<CosDistanceNode<ElemType>>(forward<_Types>(_Args)...);
