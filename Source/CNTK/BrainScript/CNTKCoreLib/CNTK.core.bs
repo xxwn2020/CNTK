@@ -103,12 +103,12 @@ CNTK2 = [
     ErrorPrediction(_, outVectorSequence, tag='') = new ComputationNode [ operation = 'ErrorPrediction' ; inputs = (_ : outVectorSequence) /*plus the function args*/ ]
 
     // 13. Comparison nodes
-    LT(_, b, tag='') = new ComputationNode [ operation = 'LT' ; inputs = (_ : b) /*plus the function args*/ ]
-	EQ(_, b, tag='') = new ComputationNode [ operation = 'EQ' ; inputs = (_ : b) /*plus the function args*/ ]
-	GT(_, b, tag='') = new ComputationNode [ operation = 'GT' ; inputs = (_ : b) /*plus the function args*/ ]
-	GE(_, b, tag='') = new ComputationNode [ operation = 'GE' ; inputs = (_ : b) /*plus the function args*/ ]
-	NE(_, b, tag='') = new ComputationNode [ operation = 'NE' ; inputs = (_ : b) /*plus the function args*/ ]
-	LE(_, b, tag='') = new ComputationNode [ operation = 'LE' ; inputs = (_ : b) /*plus the function args*/ ]
+    LT(_, y, tag='') = new ComputationNode [ operation = 'LT' ; inputs = (_ : y) /*plus the function args*/ ]
+	EQ(_, y, tag='') = new ComputationNode [ operation = 'EQ' ; inputs = (_ : y) /*plus the function args*/ ]
+	GT(_, y, tag='') = new ComputationNode [ operation = 'GT' ; inputs = (_ : y) /*plus the function args*/ ]
+	GE(_, y, tag='') = new ComputationNode [ operation = 'GE' ; inputs = (_ : y) /*plus the function args*/ ]
+	NE(_, y, tag='') = new ComputationNode [ operation = 'NE' ; inputs = (_ : y) /*plus the function args*/ ]
+	LE(_, y, tag='') = new ComputationNode [ operation = 'LE' ; inputs = (_ : y) /*plus the function args*/ ]
 
     // 13. Others
     // None so far.

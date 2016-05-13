@@ -92,6 +92,31 @@ def error_prediction(target_vector, output_vector, name=None):
     from cntk.ops.cntk2 import ErrorPrediction
     return ErrorPrediction(target_vector, output_vector, name = name)
 
+################################################################################
+# comparison ops
+################################################################################
+
+def equal(left, right, name=None):
+    """
+    Elementwise 'equal' comparison of two tensors. Result is 1 if values are equal 0 otherwise. 
+
+    Example:
+        >>> C.eval(C.eq([0, 1, 2], [0, 1, 1]))
+        [array([[2., 1., 0.]])]
+        
+        >>> C.eval(C.eq([-1,0,1], [1]))
+        [array([[0., 0., 1.]])]
+
+    Args:
+        left: left side tensor
+        right: right side tensor
+        name: the name of the node in the network            
+    Returns:
+        :class:`cntk.graph.ComputationNode`
+    """
+    from cntk.ops.cntk2 import EQ
+    return EQ(left, right, name=name)
+
 
 ################################################################################
 # linear ops

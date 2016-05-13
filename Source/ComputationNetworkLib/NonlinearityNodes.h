@@ -567,11 +567,16 @@ template class ClipNode<double>;
 // ComparsionNode(a,b)
 // -----------------------------------------------------------------------
 // Template parameters opType and polarity for selecting one of the six basic comprasions 
-template <class ElemType, int compareType, int polarity>
+template <class ElemType, ElementWiseOperator operation>
 class CompareNode : public BinaryElementWiseNode<ElemType>
 {
     typedef BinaryElementWiseNode<ElemType> Base; UsingBinaryElementwiseNodeBaseMembers;
-    static const std::wstring TypeName() { return L""; }
+    static const std::wstring TypeName() 
+    { 
+        int index = operation - ElementWiseOperator::opLT;
+        const wchar_t* names[] = { L"LT", L"EQ", L"GT", L"GE", L"NE", L"LE" };
+        return names[index];
+    }
 
 public:
     DeclareConstructorFromConfigWithNumInputs(CompareNode);
@@ -586,17 +591,11 @@ public:
     virtual void /*ComputationNode::*/ ForwardProp(const FrameRange& fr) override
     {
         size_t rank = DetermineElementwiseTensorRank();
-        auto result = ValueTensorFor(rank, fr);
+        auto result =           ValueTensorFor(rank, fr);
         auto input0 = Input(0)->ValueTensorFor(rank, fr.AllowBroadcast());
         auto input1 = Input(1)->ValueTensorFor(rank, fr.AllowBroadcast());
 
-        // The different compare operations have a fixed order in the opcodes: 
-        //          opLT, opEQ, opGT, opGE, opNE, opLE
-        // Therefore we can select the operation we like through simple index calculations.
-        int compIndex = compareType > 0 ? 2 : (compareType == 0 ? 1 : 0);
-        int polarityIndex = polarity == 0 ? 0 : 1;
-        int opIndex = compIndex + 3 * polarityIndex;
-        result.DoBinaryOpOf(0, input0, input1, 1.0f, static_cast<ElementWiseOperator> (ElementWiseOperator::opLT + opIndex), ElementWiseOperator::opSum);
+        result.DoBinaryOpOf(0, input0, input1, 1.0f, operation, ElementWiseOperator::opSum);
     }
 
     virtual void /*ComputationNode::*/ BackpropTo(const size_t inputIndex, const FrameRange& fr) override
@@ -605,27 +604,27 @@ public:
     }
 };
 
-template <class ElemType> using CompLTNode = CompareNode<ElemType, -1, 0>;
+template <class ElemType> using CompLTNode = CompareNode<ElemType, ElementWiseOperator::opLT>;
 template CompLTNode<float>;
 template CompLTNode<double>;
 
-template <class ElemType> using CompEQNode = CompareNode<ElemType,  0, 0>;
+template <class ElemType> using CompEQNode = CompareNode<ElemType, ElementWiseOperator::opEQ>;
 template CompEQNode<float>;
 template CompEQNode<double>;
 
-template <class ElemType> using CompGTNode = CompareNode<ElemType,  1, 0>;
+template <class ElemType> using CompGTNode = CompareNode<ElemType, ElementWiseOperator::opGT>;
 template CompGTNode<float>;
 template CompGTNode<double>;
 
-template <class ElemType> using CompGENode = CompareNode<ElemType, -1, 1>;
+template <class ElemType> using CompGENode = CompareNode<ElemType, ElementWiseOperator::opGE>;
 template CompGENode<float>;
 template CompGENode<double>;
 
-template <class ElemType> using CompNENode = CompareNode<ElemType,  0, 1>;
+template <class ElemType> using CompNENode = CompareNode<ElemType, ElementWiseOperator::opNE>;
 template CompNENode<float>;
 template CompNENode<double>;
 
-template <class ElemType> using CompLENode = CompareNode<ElemType,  1, 1>;
+template <class ElemType> using CompLENode = CompareNode<ElemType, ElementWiseOperator::opLE>;
 template CompLENode<float>;
 template CompLENode<double>;
 

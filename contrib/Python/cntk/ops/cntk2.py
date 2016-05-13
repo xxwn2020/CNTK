@@ -127,6 +127,14 @@ class Plus(ComputationNode):
         self.params_with_defaults = []
         self.inputs = ['_', 'y']
 
+class EQ(ComputationNode):
+    def __init__(self, _, y, op_name='CNTK2.EQ', name=None):
+        super(EQ, self).__init__(params=['_', 'y'], op_name=op_name, name=name)
+        self._ = _
+        self.y = y
+        self.params_with_defaults = []
+        self.inputs = ['_', 'y']
+
 class Tanh(ComputationNode):
     def __init__(self, _, op_name='CNTK2.Tanh', name=None):
         super(Tanh, self).__init__(params=['_'], op_name=op_name, name=name)
