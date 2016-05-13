@@ -564,9 +564,9 @@ template class ClipNode<double>;
 
 
 // -----------------------------------------------------------------------
-// ComparsionNode(a,b)
+// CompareNode(a,b)
 // -----------------------------------------------------------------------
-// Template parameters compType and polarity are used selecting one of the six basic comparison oprations. 
+// Template parameters compType (-1, 0, 1) and polarity (0, 1) are used selecting one of the six basic comparison operations. 
 template <class ElemType, int compType, int polarity>
 class CompareNode : public BinaryElementWiseNode<ElemType>
 {
