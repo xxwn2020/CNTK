@@ -204,10 +204,7 @@ TIMES_PAIRS = [
 ]
 
 @pytest.mark.parametrize("left_operand, right_operand", TIMES_PAIRS)
-def test_op_times(left_operand, right_operand):#, device_id, precision):
-    device_id = 0
-    precision = 'float'
-
+def test_op_times(left_operand, right_operand, device_id, precision):
     # Forward pass test
     #==================
     # we compute the expected output for the forward pass
