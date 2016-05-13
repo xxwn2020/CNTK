@@ -204,7 +204,8 @@ TIMES_PAIRS = [
 ]
 
 @pytest.mark.parametrize("left_operand, right_operand", TIMES_PAIRS)
-def test_op_times(left_operand, right_operand, device_id, precision):
+def test_op_times(left_operand, right_operand, device_id, precision,
+        matrix_type):
     # Forward pass test
     #==================
     # we compute the expected output for the forward pass
@@ -213,8 +214,15 @@ def test_op_times(left_operand, right_operand, device_id, precision):
     # the second for batch of one sample
     expected = [[np.dot(AA(left_operand), AA(right_operand))]]
 
-    a = I([left_operand])
-    b = I([right_operand])
+    if matrix_type == 'sparse':
+        if device_id<0:
+            pytest.skip('times() not defined for CPU/sparse')
+
+        a = SI(*batch_dense_to_sparse([left_operand]))
+        b = SI(*batch_dense_to_sparse([right_operand]))
+    else:
+        a = I([left_operand])
+        b = I([right_operand])
 
     from cntk.ops import times, constant
     left_as_input = times(a, constant(right_operand))
@@ -258,6 +266,6 @@ def test_op_times(left_operand, right_operand, device_id, precision):
     expected_right = [[op_grad(AA(right_operand).T, AA(left_operand).T).T]]
 
     unittest_helper(left_as_input, None, expected_left, device_id=device_id,
-                    precision=precision, clean_up=False, backward_pass=True, input_node=a)
+                    precision=precision, clean_up=True, backward_pass=True, input_node=a)
     unittest_helper(right_as_input, None, expected_right, device_id=device_id,
-                    precision=precision, clean_up=False, backward_pass=True, input_node=b)
+                    precision=precision, clean_up=True, backward_pass=True, input_node=b)
