@@ -38,7 +38,7 @@ static shared_ptr<ComputationNode<ElemType>> CreateStandardNode(const std::wstri
          if (nodeType == OperationNameOf(CRFNode))                              return New<CRFNode<ElemType>>(forward<_Types>(_Args)...);
     else
 #endif
-        if (nodeType == OperationNameOf(AbsNode))                                   return New<AbsNode<ElemType>>(forward<_Types>(_Args)...);
+         if (nodeType == OperationNameOf(AbsNode))                              return New<AbsNode<ElemType>>(forward<_Types>(_Args)...);
     //opLT, opEQ, opGT, opGE, opNE, opLE
     else if (nodeType == OperationNameOf(CompLTNode))                           return New<CompLTNode<ElemType>>(forward<_Types>(_Args)...);
     else if (nodeType == OperationNameOf(CompEQNode))                           return New<CompEQNode<ElemType>>(forward<_Types>(_Args)...);
