@@ -26,8 +26,13 @@ def precision(request):
 
 
 @pytest.fixture(params=["dense", "sparse"])
-def matrix_type(request):
+def left_matrix_type(request):
     return request.param
+
+@pytest.fixture(params=["dense", "sparse"])
+def right_matrix_type(request):
+    return request.param
+
 
 
 def unittest_helper(root_node, input_numpy, expected, device_id=-1, precision="float",
