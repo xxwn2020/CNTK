@@ -114,8 +114,8 @@ def less(left, right, name=None):
     Returns:
         :class:`cntk.graph.ComputationNode`
     """
-    from cntk.ops.cntk2 import LT
-    return LT(left, right, name=name)
+    from cntk.ops.cntk2 import Less
+    return Less(left, right, name=name)
 
 
 def equal(left, right, name=None):
@@ -136,8 +136,8 @@ def equal(left, right, name=None):
     Returns:
         :class:`cntk.graph.ComputationNode`
     """
-    from cntk.ops.cntk2 import EQ
-    return EQ(left, right, name=name)
+    from cntk.ops.cntk2 import Equal
+    return Equal(left, right, name=name)
 
 def greater(left, right, name=None):
     """
@@ -157,8 +157,8 @@ def greater(left, right, name=None):
     Returns:
         :class:`cntk.graph.ComputationNode`
     """
-    from cntk.ops.cntk2 import GT
-    return GT(left, right, name=name)
+    from cntk.ops.cntk2 import Greater
+    return Greater(left, right, name=name)
 
 
 def greater_equal(left, right, name=None):
@@ -179,8 +179,8 @@ def greater_equal(left, right, name=None):
     Returns:
         :class:`cntk.graph.ComputationNode`
     """
-    from cntk.ops.cntk2 import GE
-    return GE(left, right, name=name)
+    from cntk.ops.cntk2 import GreaterEqual
+    return GreaterEqual(left, right, name=name)
 
 def not_equal(left, right, name=None):
     """
@@ -200,8 +200,8 @@ def not_equal(left, right, name=None):
     Returns:
         :class:`cntk.graph.ComputationNode`
     """
-    from cntk.ops.cntk2 import NE
-    return NE(left, right, name=name)
+    from cntk.ops.cntk2 import NotEqual
+    return NotEqual(left, right, name=name)
 
 def less_equal(left, right, name=None):
     """
@@ -221,8 +221,8 @@ def less_equal(left, right, name=None):
     Returns:
         :class:`cntk.graph.ComputationNode`
     """
-    from cntk.ops.cntk2 import LE
-    return LE(left, right, name=name)
+    from cntk.ops.cntk2 import LessEqual
+    return LessEqual(left, right, name=name)
 
 ################################################################################
 # linear ops

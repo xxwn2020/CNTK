@@ -568,7 +568,7 @@ template class ClipNode<double>;
 // -----------------------------------------------------------------------
 // Template parameters compType (-1, 0, 1) and polarity (0, 1) are used selecting one of the six basic comparison operations. 
 template <class ElemType, int compType, int polarity>
-class CompareNode : public BinaryElementWiseNode<ElemType>
+class ComparisonNode : public BinaryElementWiseNode<ElemType>
 {
 private:
     // Index corresponds to different comparison operations. 
@@ -587,12 +587,12 @@ public:
 
     static const std::wstring TypeName()
     {
-		const wchar_t* names[] = { L"LT", L"EQ", L"GT", L"GE", L"NE", L"LE" };
+		const wchar_t* names[] = { L"Less", L"Equal", L"Greater", L"GreaterEqual", L"NotEqual", L"LessEqual" };
         return names[index];
     }
 
-    DeclareConstructorFromConfigWithNumInputs(CompareNode);
-    CompareNode(DEVICEID_TYPE deviceId, const wstring& name)
+    DeclareConstructorFromConfigWithNumInputs(ComparisonNode);
+    ComparisonNode(DEVICEID_TYPE deviceId, const wstring& name)
         : Base(deviceId, name)
     {
     }
@@ -616,28 +616,28 @@ public:
     }
 };
 
-template <class ElemType> using CompLTNode = CompareNode<ElemType, -1, 0>;
-template CompLTNode<float>;
-template CompLTNode<double>;
+template <class ElemType> using ComparsionLessNode = ComparisonNode<ElemType, -1, 0>;
+template ComparsionLessNode<float>;
+template ComparsionLessNode<double>;
 
-template <class ElemType> using CompEQNode = CompareNode<ElemType,  0, 0>;
-template CompEQNode<float>;
-template CompEQNode<double>;
+template <class ElemType> using ComparisonEqualNode = ComparisonNode<ElemType, 0, 0>;
+template ComparisonEqualNode<float>;
+template ComparisonEqualNode<double>;
 
-template <class ElemType> using CompGTNode = CompareNode<ElemType,  1, 0>;
-template CompGTNode<float>;
-template CompGTNode<double>;
+template <class ElemType> using ComparisonGreaterNode = ComparisonNode<ElemType, 1, 0>;
+template ComparisonGreaterNode<float>;
+template ComparisonGreaterNode<double>;
 
-template <class ElemType> using CompGENode = CompareNode<ElemType, -1, 1>;
-template CompGENode<float>;
-template CompGENode<double>;
+template <class ElemType> using ComparisonGreaterEqualNode = ComparisonNode<ElemType, -1, 1>;
+template ComparisonGreaterEqualNode<float>;
+template ComparisonGreaterEqualNode<double>;
 
-template <class ElemType> using CompNENode = CompareNode<ElemType,  0, 1>;
-template CompNENode<float>;
-template CompNENode<double>;
+template <class ElemType> using ComparisonNotEqualNode = ComparisonNode<ElemType, 0, 1>;
+template ComparisonNotEqualNode<float>;
+template ComparisonNotEqualNode<double>;
 
-template <class ElemType> using CompLENode = CompareNode<ElemType,  1, 1>;
-template CompLENode<float>;
-template CompLENode<double>;
+template <class ElemType> using ComparisonLessEqualNode = ComparisonNode<ElemType, 1, 1>;
+template ComparisonLessEqualNode<float>;
+template ComparisonLessEqualNode<double>;
 
 }}}

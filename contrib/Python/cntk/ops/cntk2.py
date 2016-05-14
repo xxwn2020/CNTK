@@ -127,49 +127,49 @@ class Plus(ComputationNode):
         self.params_with_defaults = []
         self.inputs = ['_', 'y']
 
-class LT(ComputationNode):
-    def __init__(self, _, y, op_name='CNTK2.LT', name=None):
-        super(LT, self).__init__(params=['_', 'y'], op_name=op_name, name=name)
+class Less(ComputationNode):
+    def __init__(self, _, y, op_name='CNTK2.Less', name=None):
+        super(Less, self).__init__(params=['_', 'y'], op_name=op_name, name=name)
         self._ = _
         self.y = y
         self.params_with_defaults = []
         self.inputs = ['_', 'y']
 
-class EQ(ComputationNode):
-    def __init__(self, _, y, op_name='CNTK2.EQ', name=None):
-        super(EQ, self).__init__(params=['_', 'y'], op_name=op_name, name=name)
+class Equal(ComputationNode):
+    def __init__(self, _, y, op_name='CNTK2.Equal', name=None):
+        super(Equal, self).__init__(params=['_', 'y'], op_name=op_name, name=name)
         self._ = _
         self.y = y
         self.params_with_defaults = []
         self.inputs = ['_', 'y']
 
-class GT(ComputationNode):
-    def __init__(self, _, y, op_name='CNTK2.GT', name=None):
-        super(GT, self).__init__(params=['_', 'y'], op_name=op_name, name=name)
+class Greater(ComputationNode):
+    def __init__(self, _, y, op_name='CNTK2.Greater', name=None):
+        super(Greater, self).__init__(params=['_', 'y'], op_name=op_name, name=name)
         self._ = _
         self.y = y
         self.params_with_defaults = []
         self.inputs = ['_', 'y']
 
-class GE(ComputationNode):
-    def __init__(self, _, y, op_name='CNTK2.GE', name=None):
-        super(GE, self).__init__(params=['_', 'y'], op_name=op_name, name=name)
+class GreaterEqual(ComputationNode):
+    def __init__(self, _, y, op_name='CNTK2.GreaterEqual', name=None):
+        super(GreaterEqual, self).__init__(params=['_', 'y'], op_name=op_name, name=name)
         self._ = _
         self.y = y
         self.params_with_defaults = []
         self.inputs = ['_', 'y']
 
-class NE(ComputationNode):
-    def __init__(self, _, y, op_name='CNTK2.NE', name=None):
-        super(NE, self).__init__(params=['_', 'y'], op_name=op_name, name=name)
+class NotEqual(ComputationNode):
+    def __init__(self, _, y, op_name='CNTK2.NotEqual', name=None):
+        super(NotEqual, self).__init__(params=['_', 'y'], op_name=op_name, name=name)
         self._ = _
         self.y = y
         self.params_with_defaults = []
         self.inputs = ['_', 'y']
 
-class LE(ComputationNode):
-    def __init__(self, _, y, op_name='CNTK2.LE', name=None):
-        super(LE, self).__init__(params=['_', 'y'], op_name=op_name, name=name)
+class LessEqual(ComputationNode):
+    def __init__(self, _, y, op_name='CNTK2.LessEqual', name=None):
+        super(LessEqual, self).__init__(params=['_', 'y'], op_name=op_name, name=name)
         self._ = _
         self.y = y
         self.params_with_defaults = []

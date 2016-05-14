@@ -26,12 +26,12 @@ IsSameObject(a,b) = new CompareFunction [ what = 'IsSameObject' ; args = (a : b)
 # comparison functions
 ##############################################################################
 
-LT = CNTK2.LT
-EQ = CNTK2.EQ
-GT = CNTK2.GT
-GE = CNTK2.GE
-NE = CNTK2.NE
-LE = CNTK2.LE
+Less         = CNTK2.Less
+Equal        = CNTK2.Equal
+Greater      = CNTK2.Greater
+GreaterEqual = CNTK2.GreaterEqual
+NotEqual     = CNTK2.NotEqual
+LessEqual    = CNTK2.LessEqual
 
 ##############################################################################
 # ComputationNodes
@@ -114,12 +114,12 @@ CNTK2 = [
     ErrorPrediction(_, outVectorSequence, tag='') = new ComputationNode [ operation = 'ErrorPrediction' ; inputs = (_ : outVectorSequence) /*plus the function args*/ ]
 
     // 13. Comparison nodes
-    LT(_, y, tag='') = new ComputationNode [ operation = 'LT' ; inputs = (_ : y) /*plus the function args*/ ]
-	EQ(_, y, tag='') = new ComputationNode [ operation = 'EQ' ; inputs = (_ : y) /*plus the function args*/ ]
-	GT(_, y, tag='') = new ComputationNode [ operation = 'GT' ; inputs = (_ : y) /*plus the function args*/ ]
-	GE(_, y, tag='') = new ComputationNode [ operation = 'GE' ; inputs = (_ : y) /*plus the function args*/ ]
-	NE(_, y, tag='') = new ComputationNode [ operation = 'NE' ; inputs = (_ : y) /*plus the function args*/ ]
-	LE(_, y, tag='') = new ComputationNode [ operation = 'LE' ; inputs = (_ : y) /*plus the function args*/ ]
+    Less(_, y, tag='')         = new ComputationNode [ operation = 'Less'         ; inputs = (_ : y) /*plus the function args*/ ]
+	Equal(_, y, tag='')        = new ComputationNode [ operation = 'Equal'        ; inputs = (_ : y) /*plus the function args*/ ]
+	Greater(_, y, tag='')      = new ComputationNode [ operation = 'Greater'      ; inputs = (_ : y) /*plus the function args*/ ]
+	GreaterEqual(_, y, tag='') = new ComputationNode [ operation = 'GreaterEqual' ; inputs = (_ : y) /*plus the function args*/ ]
+	NotEqual(_, y, tag='')     = new ComputationNode [ operation = 'NotEqual'     ; inputs = (_ : y) /*plus the function args*/ ]
+	LessEqual(_, y, tag='')    = new ComputationNode [ operation = 'LessEqual'    ; inputs = (_ : y) /*plus the function args*/ ]
 
     // 13. Others
     // None so far.
